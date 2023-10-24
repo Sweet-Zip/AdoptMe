@@ -31,4 +31,6 @@ class UserRepository extends GetxController {
       print(error.toString());
     });
   }
+
+  //TODO: make fetch user info
 }
