@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'add_post_screen.dart';
 import 'sub_screen/category_screen.dart';
 import 'sub_screen/home_screen.dart';
 import 'sub_screen/profile_screen.dart';
@@ -25,12 +26,12 @@ class _ItemMainScreenState extends State<ItemMainScreen> {
   Widget _buildBody() {
     return IndexedStack(
       index: _currentIndex,
-      children: [
-        const HomeScreen(),
-        const CategoryScreen(),
-        Container(color: Colors.purple),
-        const ProfileScreen(),
-        const SettingScreen(),
+      children: const [
+        HomeScreen(),
+        CategoryScreen(),
+        AddPostScreen(),
+        ProfileScreen(),
+        SettingScreen(),
       ],
     );
   }

@@ -24,7 +24,7 @@ class UserRepository extends GetxController {
           ),
         )
         .catchError((error, stackTrace) {
-      Get.snackbar('Failed', 'Your account no create successfully',
+      Get.snackbar('Failed', 'Your account not create successfully',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white);
@@ -33,4 +33,35 @@ class UserRepository extends GetxController {
   }
 
   //TODO: make fetch user info
+
+  Future<UserModel> getUserInfo(String email) async {
+    final snapshot =
+        await _db.collection('users').where('email', isEqualTo: email).get();
+    final userData = snapshot.docs.map((e) => UserModel.fromSnapshot(e)).single;
+    return userData;
+  }
+
+  /*Future<UserModel?> getUserInfo(String email) async {
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      // Assuming there's only one user with the provided email
+      final userData = UserModel.fromSnapshot(snapshot.docs.first);
+      return userData;
+    } else {
+      return null; // User not found with the provided email
+    }
+  }*/
+
+
+  Future<List<UserModel>> allUsers(String email) async {
+    final snapshot =
+        await _db.collection('users').get();
+    final userData =
+        snapshot.docs.map((e) => UserModel.fromSnapshot(e)).toList();
+    return userData;
+  }
 }

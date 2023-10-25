@@ -1,3 +1,4 @@
+import 'package:adoptme/helpers/user_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import '../components/custom_textFormField.dart';
 import '../components/my_button.dart';
 import '../helpers/auth_helper.dart';
 import '../logic/user_logic.dart';
+import '../models/user_model.dart';
 import '../themes/theme.dart';
 import '../themes/themeProvider.dart';
 import 'forgot_pass_screen.dart';
@@ -133,31 +135,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               GestureDetector(
                 onTap: () async {
-                  /*if (_formKey.currentState!.validate()) {
-                    String email = emailController.text;
-                    String password = passwordController.text;
-                    if (isEmailValid(email)) {
-                      // Email is valid
-                      await userLogic.loginUserWithNewId(
-                        context: context, // Pass the BuildContext
-                        email: email,
-                        password: password,
-                      );
-                    } else {
-                      // Email is not valid
-                      setState(() {
-                        _errorMessage =
-                            'Email is not valid'; // Set the error message
-                      });
-                    }
-                  }*/
                   if (_formKey.currentState!.validate()) {
                     User? user = await AuthHelper.loginEmailAndPassword(
                       _emailController.text.trim(),
                       _passwordController.text.trim(),
                     );
-
-                    debugPrint(user.toString());
 
                     if (user == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -166,9 +148,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       );
                     } else {
+                      // Fetch user information
+                      final UserModel userData = await UserRepository.instance.getUserInfo(_emailController.text.trim());
+                      print(userData);
+                      // Navigate to the next screen and pass the user information
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => const ItemMainScreen(),
+                          builder: (context) => ItemMainScreen(),
                         ),
                       );
                     }
@@ -178,6 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   textString: 'Sign In',
                 ),
               ),
+
               const SizedBox(height: 50),
               _buildRegisterBtn(),
             ],

@@ -1,3 +1,4 @@
+import 'package:adoptme/components/my_button.dart';
 import 'package:flutter/material.dart';
 
 import '../components/custom_textFormField.dart';
@@ -26,11 +27,11 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
   Widget _buildBody() {
     return Column(
       children: [
-        const SizedBox(height: 80),
-        const Icon(
+        const SizedBox(height: 150),
+        Icon(
           Icons.lock,
-          size: 200,
-          color: Color(0xff00AEEF),
+          size: 120,
+          color: Theme.of(context).colorScheme.primary,
         ),
         const SizedBox(height: 20),
         const Text(
@@ -45,6 +46,17 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
           validValue: 'Please Enter valid email',
           inputType: TextInputType.emailAddress,
         ),
+        const Spacer(),
+        // const SizedBox(height: 30),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 25.0),
+          child: GestureDetector(
+            onTap: (){
+
+            },
+            child: const MyButton(textString: 'Submit'),
+          ),
+        )
       ],
     );
   }
