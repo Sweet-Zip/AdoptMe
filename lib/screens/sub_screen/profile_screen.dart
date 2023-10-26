@@ -10,8 +10,26 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   String phoneNumber = '1234567890';
+  TabController? _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      initialIndex: 0,
+      length: 2,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    // Dispose the TabController when the screen is disposed to prevent memory leaks
+    _tabController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +134,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
-          return _customGridItem();
+          return DefaultTabController(
+            length: 2,
+            child: _customGridItem(),
+          );
         },
         childCount: 10,
       ),

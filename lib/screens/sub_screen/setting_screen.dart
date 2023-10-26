@@ -1,3 +1,5 @@
+import 'package:adoptme/components/custom_row.dart';
+import 'package:adoptme/screens/sub_screen/profile_setting.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -47,130 +49,68 @@ class _SettingScreenState extends State<SettingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Card(
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Table(
-                      columnWidths: const <int, TableColumnWidth>{
-                        0: IntrinsicColumnWidth(),
-                        1: FlexColumnWidth(),
-                        2: IntrinsicColumnWidth(),
-                      },
-                      defaultVerticalAlignment:
-                          TableCellVerticalAlignment.middle,
-                      children: [
-                        TableRow(
-                          children: <Widget>[
-                            GestureDetector(
-                              onTap: () {
-                                print('clicked');
-                                Navigator.of(context)
-                                    .push(MaterialPageRoute(builder: (context) {
-                                  return const PreferenceScreen();
-                                }));
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.settings_applications,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('Preference'),
-                                    ),
-                                    const Spacer(),
-                                    Icon(
-                                      Icons.arrow_forward_ios_outlined,
-                                      color: Colors.grey.shade700,
-                                      size: 20,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: <Widget>[
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ChangePasswordScreen(),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.lock_open_rounded,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('Change Password'),
-                                    ),
-                                    const Spacer(),
-                                    Icon(
-                                      Icons.arrow_forward_ios_outlined,
-                                      color: Colors.grey.shade700,
-                                      size: 20,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: <Widget>[
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => const AboutScreen(),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.warning_amber_rounded,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('About'),
-                                    ),
-                                    const Spacer(),
-                                    Icon(
-                                      Icons.arrow_forward_ios_outlined,
-                                      color: Colors.grey.shade700,
-                                      size: 20,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          CustomRow(
+                            icon: Icons.person_rounded,
+                            text: 'Profile Setting',
+                            color: Colors.grey.shade700,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) {
+                                    return const ProfileSetting();
+                                  }));
+                            },
+                          ),
+                          CustomRow(
+                            icon: Icons.settings_applications,
+                            text: 'Preference',
+                            color: Colors.grey.shade700,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) {
+                                    return const PreferenceScreen();
+                                  }));
+                            },
+                          ),
+                          CustomRow(
+                            icon: Icons.lock_open_rounded,
+                            text: 'Change Password',
+                            color: Colors.grey.shade700,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) {
+                                    return const ChangePasswordScreen();
+                                  }));
+                            },
+                          ),
+                          CustomRow(
+                            icon: Icons.warning_amber_rounded,
+                            text: 'About',
+                            color: Colors.grey.shade700,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) {
+                                    return const AboutScreen();
+                                  }));
+                            },
+                          ),
+                        ],
+                      )
                   ),
                 ),
               ),
             ),
             const Spacer(),
             Container(
-              margin: const EdgeInsets.only(bottom: 25.0), // Adjust the margin as needed
+              margin: const EdgeInsets.only(bottom: 25.0),
+              // Adjust the margin as needed
               child: _buildSignOutBtn(),
             ),
           ],
@@ -179,19 +119,19 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
-  Widget _buildSignOutBtn() {
-    return GestureDetector(
-      onTap: () async {
-        await FirebaseAuth.instance.signOut();
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => LoginScreen(),
-          ),
-        );
-      },
-      child: const MyButton(
-        textString: 'Sign Out',
-      ),
-    );
+    Widget _buildSignOutBtn() {
+      return GestureDetector(
+        onTap: () async {
+          await FirebaseAuth.instance.signOut();
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => LoginScreen(),
+            ),
+          );
+        },
+        child: const MyButton(
+          textString: 'Sign Out',
+        ),
+      );
+    }
   }
-}
