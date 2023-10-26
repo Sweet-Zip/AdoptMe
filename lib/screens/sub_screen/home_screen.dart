@@ -1,4 +1,7 @@
+import 'package:adoptme/logic/post_logic.dart';
+import 'package:adoptme/models/postModel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'profile_screen.dart';
@@ -25,32 +28,53 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBody() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade900,
-      ),
-      child: _buildPageViewBuilder(),
-    );
+    String? error = context.watch<PostLogic>().error;
+    if (error != null) {
+      return Center(child: Text("Error Fetching Data"));
+    } else {
+      List<Post>? list = context.watch<PostLogic>().postList;
+
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade900,
+        ),
+        child: _buildPageViewBuilder(list),
+      );
+    }
   }
 
-  Widget _buildPageViewBuilder() {
+  Widget _buildPageViewBuilder(List<Post>? list) {
+    if (list == null) {
+      return Center(
+        child: Text("Empty"),
+      );
+    }
     return PageView.builder(
       physics: BouncingScrollPhysics(),
       itemBuilder: (context, index) {
-        return _buildPageItem();
+        return _buildPageItem(list[index]);
       },
       scrollDirection: Axis.vertical,
-      itemCount: 5,
+      itemCount: list.length,
     );
   }
 
-  Widget _buildPageItem() {
+  Widget _buildPageItem(Post post) {
     return Stack(
       children: [
         Positioned.fill(
           child: Image.network(
-            'https://images.unsplash.com/photo-1596457107504-7f8ba467b685?auto=format&fit=crop&q=80&w=1000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGFuaW1hbCUyMHBvcnRyYWl0fGVufDB8fDB8fHww',
+            post.imageLink,
             fit: BoxFit.fitHeight,
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black87])),
           ),
         ),
         Positioned(
@@ -103,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Text(
-                '1',
+                post.like.toString(),
                 style: TextStyle(color: Colors.white),
               ),
               const SizedBox(height: 25),
@@ -131,12 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Pet Owner Needed ASAP",
+                  post.title,
                   style: TextStyle(fontSize: 20, color: Colors.grey.shade300),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "I’m recently found this dog at the side of the road. Looking for someone to take care of him as soon as possible. The dog is already vaccinated.",
+                  post.caption,
                   style: TextStyle(color: Colors.grey.shade400),
                 ),
                 const SizedBox(height: 10),

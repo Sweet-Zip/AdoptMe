@@ -1,3 +1,4 @@
+import 'package:adoptme/logic/post_logic.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,14 +17,19 @@ Future<void> main() async {
   );
 /*  Get.put<UserRepository>();*/
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-      ],
-      child: const MyApp(),
-    ),
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (context) => ThemeProvider()),
+      ChangeNotifierProvider(create: (context) => PostLogic()),
+    ], child: const MyApp()),
   );
 }
+
+// AppProvider() {
+//   return MultiProvider(
+//     providers: [],
+//     child: const MyApp(),
+//   );
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
