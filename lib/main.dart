@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: Provider.of<ThemeProvider>(context).themeData,
       home: const SplashScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

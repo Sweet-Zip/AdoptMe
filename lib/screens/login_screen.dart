@@ -1,19 +1,17 @@
-import 'package:adoptme/helpers/user_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../components/custom_textFormField.dart';
 import '../components/my_button.dart';
 import '../helpers/auth_helper.dart';
 import '../logic/user_logic.dart';
-import '../models/user_model.dart';
 import '../themes/theme.dart';
 import '../themes/themeProvider.dart';
 import 'forgot_pass_screen.dart';
 import 'item_main_screen.dart';
 import 'register_screen.dart';
-import 'sub_screen/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
@@ -93,8 +91,15 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 50),
               Image.network(
-                  "https://www.creativefabrica.com/wp-content/uploads/2020/09/01/Dog-paw-vector-icon-logo-design-heart-Graphics-5223218-1.jpg",
-                  height: 200),
+                "https://www.creativefabrica.com/wp-content/uploads/2020/09/01/Dog-paw-vector-icon-logo-design-heart-Graphics-5223218-1.jpg",
+                height: 200,
+                errorBuilder: (context, error, stackTrace) {
+                  return SizedBox(
+                    height: 200,
+                    child: Image.asset('assets/images/image_not_available.png'),
+                  );
+                },
+              ),
               const SizedBox(height: 25),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 25),
@@ -149,8 +154,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     } else {
                       // Fetch user information
-                      final UserModel userData = await UserRepository.instance.getUserInfo(_emailController.text.trim());
-                      print(userData);
+                      /*final UserModel userData = await UserRepository.instance.getUserInfo(_emailController.text.trim());
+                      print(userData);*/
                       // Navigate to the next screen and pass the user information
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
@@ -164,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   textString: 'Sign In',
                 ),
               ),
-
               const SizedBox(height: 50),
               _buildRegisterBtn(),
             ],
