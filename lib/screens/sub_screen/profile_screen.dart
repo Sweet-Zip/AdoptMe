@@ -1,3 +1,5 @@
+import 'package:adoptme/logic/user_logic.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,26 +12,11 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
   String phoneNumber = '1234567890';
-  TabController? _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(
-      initialIndex: 0,
-      length: 2,
-      vsync: this,
-    );
-  }
-
-  @override
-  void dispose() {
-    // Dispose the TabController when the screen is disposed to prevent memory leaks
-    _tabController?.dispose();
-    super.dispose();
-  }
+  UserLogic userLogic = UserLogic();
+  User? user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       physics: const BouncingScrollPhysics(),
       slivers: [
         SliverAppBar(
+          automaticallyImplyLeading: ModalRoute.of(context)?.canPop ?? true,
           expandedHeight: 300,
           pinned: false,
           floating: false,
@@ -77,6 +65,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Widget _buildUserInfo() {
+    String uid = user!.uid;
+    userLogic.readUserById(id: uid);
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
@@ -85,7 +75,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           children: [
             ClipOval(
               child: Image.network(
-                'https://www.creativefabrica.com/wp-content/uploads/2020/09/01/Dog-paw-vector-icon-logo-design-heart-Graphics-5223218-1.jpg',
+                userLogic.profileImage!,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/images/image_not_found.jpg',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  );
+                },
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
@@ -95,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               height: 10,
             ),
             Text(
-              'Username',
+              userLogic.username ?? 'Username',
               style: TextStyle(fontSize: 20),
             ),
             const SizedBox(

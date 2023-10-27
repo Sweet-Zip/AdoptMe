@@ -1,8 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:adoptme/logic/user_logic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import '../components/custom_snackbar.dart';
 
 class AuthHelper {
+  UserLogic userLogic = UserLogic();
+
   static Future<User?> loginEmailAndPassword(
       String email, String password) async {
     try {
@@ -11,6 +16,9 @@ class AuthHelper {
         email: email,
         password: password,
       );
+      User? user = FirebaseAuth.instance.currentUser;
+      String uid = user!.uid;
+      print('Login successful. User UID: $uid');
       return credential.user;
     } catch (e) {
       print("AuthHelper login error: ${e.toString()}");
@@ -18,20 +26,34 @@ class AuthHelper {
     }
   }
 
-  static Future<User?> registerEmailAndPassword(
-      String email, String password) async {
+  Future<User?> registerEmailAndPassword(
+      BuildContext context, String email, String password, username) async {
     try {
       UserCredential credential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      User? user = FirebaseAuth.instance.currentUser;
+      String uid = user!.uid;
+      await userLogic.registerUser(
+        context: context,
+        userID: uid,
+        username: username,
+        email: email,
+        profileImage: 'Null',
+      );
+
+      print('Registration successful. User UID: $uid');
       return credential.user;
     } catch (e) {
       print("AuthHelper login error: ${e.toString()}");
+      if (e is FirebaseAuthException && e.code == 'email-already-in-use') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          CustomSnackBar(errorText: 'Email Already in use'),
+        );
+      }
       return null;
     }
   }
-
-
 }

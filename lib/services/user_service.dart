@@ -1,20 +1,28 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/user_model.dart';
 
-class UserService {
-  static Future<void> loginUser(String email, String password) async {
-    const baseUrl =
-        'http://192.168.50.115:3000'; // Replace with your server's base URL
+class UserService with ChangeNotifier {
+  List<UserModel>? _userList;
+
+  List<UserModel>? get userList => _userList;
+
+  set userList(List<UserModel>? userList) {
+    _userList = userList;
+    notifyListeners();
+  }
+
+  final String _baseUrl = 'http://192.168.56.1:3000/api';
+
+  Future<void> loginUser(String email, String password) async {
     final endpoint =
         '/users?email=$email&password=$password'; // Replace with the actual endpoint for authentication
 
     try {
-      final response = await http.get(Uri.parse(baseUrl + endpoint));
+      final response = await http.get(Uri.parse(_baseUrl + endpoint));
 
       if (response.statusCode == 200) {
         // Authentication successful
@@ -31,15 +39,19 @@ class UserService {
   }
 
   Future<void> registerUser(
-      String username, String email, String password) async {
-    final url = Uri.parse(
-        'http://192.168.50.115:3000/users'); // Replace with your JSON server URL
+      String userId, String username, String email, String profileImage) async {
+    final url =
+        Uri.parse('$_baseUrl/add_user'); // Replace with your JSON server URL
 
     try {
       final response = await http.post(
         url,
-        body: json.encode(
-            {'username': username, 'email': email, 'password': password}),
+        body: json.encode({
+          'user_id': userId,
+          'username': username,
+          'email': email,
+          'profile_image': profileImage
+        }),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -57,15 +69,15 @@ class UserService {
     }
   }
 
-  static Future readUser({
+  Future readUser({
     required String email,
     required String password,
     required void Function(List<UserModel>?) onResult,
     required void Function(String?) onReject,
   }) async {
     try {
-      http.Response res = await http.get(Uri.parse(
-          "http://192.168.50.115:3000/users?email=$email&password=$password"));
+      http.Response res = await http
+          .get(Uri.parse('$_baseUrl/users?email=$email&password=$password'));
       onResult(await compute(_convertData, res.body));
       onReject(null);
     } catch (e) {
@@ -73,23 +85,35 @@ class UserService {
     }
   }
 
-  static Future readUserID({
-    required int id,
+  Future readUserID({
+    required String id,
     required void Function(List<UserModel>?) onResult,
     required void Function(String?) onReject,
   }) async {
     try {
-      http.Response res =
-          await http.get(Uri.parse("http://192.168.50.115:3000/users?id=$id"));
-      onResult(await compute(_convertData, res.body));
-      onReject(null);
+      final response = await http.get(Uri.parse("$_baseUrl/users/$id"));
+      if (response.statusCode == 200) {
+        final responseBody = response.body; // Extract the response body
+        final jsonData = json.decode(responseBody); // Parse the JSON data
+        _userList = _convertData(jsonData); // Overwrite the existing _userList
+        onResult(_userList); // Return the updated _userList
+      } else {
+        onReject("HTTP Error: ${response.statusCode}");
+      }
     } catch (e) {
       onReject("Error: ${e.toString()}");
     }
   }
 
-  static List<UserModel> _convertData(String data) {
-    List<UserModel> list = userModelFromJson(data);
-    return list;
+  List<UserModel> _convertData(dynamic data) {
+    if (data is List) {
+      return data
+          .map((item) => UserModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else if (data is Map<String, dynamic>) {
+      return [UserModel.fromJson(data)];
+    } else {
+      return [];
+    }
   }
 }

@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:adoptme/components/custom_textFormField.dart';
 import 'package:adoptme/components/my_appbar.dart';
 import 'package:adoptme/components/my_button.dart';
+import 'package:adoptme/logic/post_logic.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,6 +25,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final List<String> _items = ['Dog', 'Cat', 'Bird', 'Fish', 'Other'];
   final TextEditingController _captionController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
+  User? user = FirebaseAuth.instance.currentUser;
+  PostLogic postLogic = PostLogic();
 
   @override
   Widget build(BuildContext context) {
@@ -102,26 +107,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         child: Center(
           child: Column(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: TextFormField(
-                  minLines: 6,
-                  maxLines: null,
-                  maxLength: 200,
-                  controller: _captionController,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    hintText: 'Caption',
-                    enabledBorder:
-                        outLine(Theme.of(context).colorScheme.primary),
-                    focusedBorder:
-                        outLine(Theme.of(context).colorScheme.primary),
-                    errorBorder: outLine(Colors.red),
-                    focusedErrorBorder:
-                        outLine(Theme.of(context).colorScheme.primary),
-                  ),
-                ),
-              ),
+              _buildTextArea(),
               const SizedBox(height: 20),
               CustomTextField(
                 hintText: '+855 12345678',
@@ -131,47 +117,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 inputType: TextInputType.phone,
               ),
               const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: GestureDetector(
-                  onTap: () {
-                    _typeAheadController.clear();
-                    FocusScope.of(context).unfocus();
-                  },
-                  child: TypeAheadFormField(
-                    textFieldConfiguration: TextFieldConfiguration(
-                      controller: _typeAheadController,
-                      decoration: InputDecoration(
-                        labelText: 'Search Item',
-                        suffixIcon: const Icon(Icons.arrow_drop_down),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                    ),
-                    itemBuilder: (context, suggestion) => ListTile(
-                      title: Text(suggestion),
-                    ),
-                    suggestionsCallback: (pattern) {
-                      final List<String> filteredItems = _items
-                          .where((item) => item
-                              .toLowerCase()
-                              .contains(pattern.toLowerCase()))
-                          .toList();
-                      return filteredItems;
-                    },
-                    transitionBuilder: (context, suggestionsBox, controller) =>
-                        suggestionsBox,
-                    onSuggestionSelected: (suggestion) {
-                      _typeAheadController.text = suggestion;
-                      print('Selected: $suggestion');
-                    },
-                    validator: (value) =>
-                        value!.isEmpty ? 'Select animal type' : null,
-                    onSaved: (value) => selectedValue = value,
-                  ),
-                ),
-              ),
+              _buildCategory(),
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: showOptions,
@@ -190,7 +136,24 @@ class _AddPostScreenState extends State<AddPostScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 25),
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    String uid = user!.uid;
+                    print(
+                        '$uid ${_captionController.text}, ${_contactController.text}');
+                    try {
+                      // Call the addPost method
+                      await postLogic.addPost(
+                        userId: uid,
+                        caption: _captionController.text,
+                        contact: _contactController.text,
+                        image: 'Test',
+                      );
+                      print('Post addition successful');
+                    } catch (e) {
+                      print('Error adding post: $e');
+                      rethrow; // Rethrow the exception to propagate it
+                    }
+                  },
                   child: const MyButton(
                     textString: 'Post',
                   ),
@@ -198,6 +161,68 @@ class _AddPostScreenState extends State<AddPostScreen> {
               )
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextArea() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: TextFormField(
+        minLines: 6,
+        maxLines: null,
+        maxLength: 200,
+        controller: _captionController,
+        keyboardType: TextInputType.multiline,
+        decoration: InputDecoration(
+          hintText: 'Caption',
+          enabledBorder: outLine(Theme.of(context).colorScheme.primary),
+          focusedBorder: outLine(Theme.of(context).colorScheme.primary),
+          errorBorder: outLine(Colors.red),
+          focusedErrorBorder: outLine(Theme.of(context).colorScheme.primary),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategory() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      child: GestureDetector(
+        onTap: () {
+          _typeAheadController.clear();
+          FocusScope.of(context).unfocus();
+        },
+        child: TypeAheadFormField(
+          textFieldConfiguration: TextFieldConfiguration(
+            controller: _typeAheadController,
+            decoration: InputDecoration(
+              labelText: 'Search Item',
+              suffixIcon: const Icon(Icons.arrow_drop_down),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+          itemBuilder: (context, suggestion) => ListTile(
+            title: Text(suggestion),
+          ),
+          suggestionsCallback: (pattern) {
+            final List<String> filteredItems = _items
+                .where((item) =>
+                    item.toLowerCase().contains(pattern.toLowerCase()))
+                .toList();
+            return filteredItems;
+          },
+          transitionBuilder: (context, suggestionsBox, controller) =>
+              suggestionsBox,
+          onSuggestionSelected: (suggestion) {
+            _typeAheadController.text = suggestion;
+            print('Selected: $suggestion');
+          },
+          validator: (value) => value!.isEmpty ? 'Select animal type' : null,
+          onSaved: (value) => selectedValue = value,
         ),
       ),
     );

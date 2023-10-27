@@ -26,7 +26,7 @@ class _ItemMainScreenState extends State<ItemMainScreen> {
   Widget _buildBody() {
     return IndexedStack(
       index: _currentIndex,
-      children: const [
+      children: [
         HomeScreen(),
         CategoryScreen(),
         AddPostScreen(),

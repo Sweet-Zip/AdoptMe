@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 // Use the user routes
-app.use('/adoptme', userRoutes);
+app.use('/api', userRoutes);
 
 // Create the "users" table (ensure it exists before starting the server)
 createTable();

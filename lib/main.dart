@@ -1,10 +1,11 @@
+import 'package:adoptme/services/user_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
-import 'helpers/user_repository.dart';
+import 'logic/user_logic.dart';
 import 'screens/splash_screen.dart';
 import 'themes/themeProvider.dart';
 
@@ -19,6 +20,8 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => UserLogic()),
+        ChangeNotifierProvider(create: (context) => UserService()),
       ],
       child: const MyApp(),
     ),

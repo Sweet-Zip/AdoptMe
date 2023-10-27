@@ -21,8 +21,8 @@ const upload = multer({ storage });
 
 // POST endpoint to create a new user
 router.post('/add_user', async (req, res) => {
-  const { username, email, user_image } = req.body;
-  await userController.createUser(username, email, user_image);
+  const { user_id, username, email, profile_image } = req.body;
+  await userController.createUser(user_id, username, email, profile_image);
   res.status(201).json({ message: 'User created successfully' });
 });
 
@@ -32,11 +32,24 @@ router.get('/users', async (req, res) => {
   res.json(users);
 });
 
+router.get('/users/:user_id', async (req, res) => {
+  const userId = req.params.user_id;
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+  const user = await userController.getUserById(userId);
+  if (user) {
+    res.status(200).json(user); // User found, return user data
+  } else {
+    res.status(404).json({ error: 'User not found' });
+  }
+});
+
 // PUT endpoint to update a user's details
 router.put('/update_user/:user_id', async (req, res) => {
   const userId = req.params.user_id;
-  const { username, email, user_image } = req.body;
-  await userController.updateUser(userId, username, email, user_image);
+  const { user_id, username, email, profile_image } = req.body;
+  await userController.updateUser(userId, username, email, profile_image);
   res.json({ message: 'User details updated successfully' });
 });
 

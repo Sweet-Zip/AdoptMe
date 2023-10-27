@@ -61,8 +61,21 @@ class _AboutScreenState extends State<AboutScreen> {
             const SizedBox(height: 10),
             Image.asset('assets/images/about_img_2.png'),
             const SizedBox(height: 10),
-            const Text(
-              '“[Application Name]” is an application created by three IT students from Limkokwing University who are passionate about helping the community. The application aims to provide comfortable homes for less fortunate pets, such as strays and pets that need relocation. This will be achieved by connecting pet lovers all around Cambodia and providing them with a platform to connect and share pet relocation postings. Ultimately, the goal is to reduce the number of less fortunate pets and foster a more loving community',
+            const Text.rich(
+              TextSpan(
+                text: '“',
+                children: <TextSpan>[
+                  TextSpan(
+                    text: 'AdoptMe',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                      text:
+                          '” is an application created by three IT students from Limkokwing University who are passionate about helping the community. The application aims to provide comfortable homes for less fortunate pets, such as strays and pets that need relocation. This will be achieved by connecting pet lovers all around Cambodia and providing them with a platform to connect and share pet relocation postings. Ultimately, the goal is to reduce the number of less fortunate pets and foster a more loving community'),
+                ],
+              ),
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 15),

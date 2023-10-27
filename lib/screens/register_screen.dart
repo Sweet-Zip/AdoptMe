@@ -1,5 +1,6 @@
+import 'package:adoptme/components/custom_snackbar.dart';
+import 'package:adoptme/components/my_appbar.dart';
 import 'package:adoptme/helpers/auth_helper.dart';
-import 'package:adoptme/helpers/user_repository.dart';
 import 'package:adoptme/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,15 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent, // Make the AppBar transparent
-        iconTheme: IconThemeData(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white
-              : Colors.grey.shade700,
-        ),
-        elevation: 0, // Remove the shadow
-      ),
+      appBar: const MyAppBar(title: ''),
       body: SafeArea(
         child: _buildBody(),
       ),
@@ -41,7 +34,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPassController = TextEditingController();
   UserLogic userLogic = UserLogic();
-  UserRepository userRepository = UserRepository();
+  AuthHelper authHelper = AuthHelper();
+  String? password;
+  String? confirmPassword;
+
+  String? passwordMatchValidator(String value) {
+    if (password == confirmPassword) {
+      return null; // No error if passwords match
+    } else {
+      return 'Passwords do not match';
+    }
+  }
 
   Widget _buildBody() {
     return Form(
@@ -49,12 +52,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Column(
         children: [
           const SizedBox(height: 10),
-          Image.network(
-            "https://www.creativefabrica.com/wp-content/uploads/2020/09/01/Dog-paw-vector-icon-logo-design-heart-Graphics-5223218-1.jpg",
-            height: 100,
+          Container(
+            height: 120,
+            width: 120,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+            ),
+            child: ClipOval(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  'assets/images/app_logo.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.fitHeight,
+                ),
+              ),
+            ),
           ),
           const SizedBox(
-            height: 25,
+            height: 15,
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 25),
@@ -111,65 +128,82 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(
             height: 25,
           ),
-          GestureDetector(
-            onTap: () async {
-              if (_formKey.currentState!.validate()) {
-                // Validation successful, proceed with your action
-                String user = _usernameController.text;
-                String email = _emailController.text;
-                String password = _passwordController.text;
-                String confirmPass = _confirmPassController.text;
-                dynamic result =
-                    await AuthHelper.registerEmailAndPassword(email, password);
-                if (result is User) {
-                  print('Register successful ${user} email: ${email}');
-                  userRepository.addUserInfo(UserModel(
-                    username: user,
-                    email: email,
-                    password: password,
-                  ));
-                } else if (result is FirebaseAuthException) {
-                  print('Register Fail');
-                  // Registration failed, handle the error
-                  if (result.code == 'email-already-in-use') {
-                    print('Email already in use');
-                    // The email is already in use by another account.
-                  } else {
-                    // Handle other error codes as needed.
-                  }
-                } else {
-                  // Handle unexpected errors or other cases.
-                }
-              }
-            },
-            child: const MyButton(
-              textString: 'Sign Up',
-            ),
-          ),
+          _buildRegisterBtn(),
           const SizedBox(
             height: 25,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Already have an account? '),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context)
-                      .pop(); // Navigate back to the previous screen
-                },
-                child: const Text(
-                  'Login',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xff008CCF),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildLoginBtn(),
         ],
       ),
+    );
+  }
+
+  Widget _buildRegisterBtn() {
+    return GestureDetector(
+      onTap: () async {
+        if (_formKey.currentState!.validate()) {
+          // Validation successful, proceed with your action
+          String username = _usernameController.text;
+          String email = _emailController.text;
+          String password = _passwordController.text;
+          String confirmPass = _confirmPassController.text;
+
+          if (password == confirmPass) {
+            // Passwords match
+            dynamic result = await authHelper.registerEmailAndPassword(
+              context,
+              email,
+              password,
+              username,
+            );
+
+            if (result is User) {
+              print('Register successful $username email: $email');
+            } else if (result is FirebaseAuthException) {
+              // Handle registration failure
+              if (result.code == 'email-already-in-use') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  CustomSnackBar(errorText: 'Email already in use'),
+                );
+                // The email is already in use by another account.
+              } else {
+                // Handle other error codes as needed.
+              }
+            } else {
+              // Handle unexpected errors or other cases.
+            }
+          } else {
+            // Passwords don't match, display an error
+            ScaffoldMessenger.of(context).showSnackBar(
+              CustomSnackBar(errorText: 'Passwords do not match'),
+            );
+          }
+        }
+      },
+      child: const MyButton(
+        textString: 'Sign Up',
+      ),
+    );
+  }
+
+  Widget _buildLoginBtn() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Already have an account? '),
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop(); // Navigate back to the previous screen
+          },
+          child: const Text(
+            'Login',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xff008CCF),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

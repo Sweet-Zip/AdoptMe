@@ -1,50 +1,44 @@
-// To parse this JSON data, do
-//
-//     final userModel = userModelFromJson(jsonString);
-
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-List<UserModel> userModelFromJson(String str) =>
-    List<UserModel>.from(json.decode(str).map((x) => UserModel.fromJson(x)));
-
-String userModelToJson(List<UserModel> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
-
 class UserModel {
-  String? id;
+  String userId;
   String username;
   String email;
-  String password;
+  String profileImage;
 
   UserModel({
-    this.id,
+    required this.userId,
     required this.username,
     required this.email,
-    required this.password,
+    required this.profileImage,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        username: json["username"],
-        email: json["email"],
-        password: json["password"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "username": username,
-        "email": email,
-        "password": password,
-      };
-
-  factory UserModel.fromSnapshot(
-      DocumentSnapshot<Map<String, dynamic>> document) {
-    final data = document.data()!;
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: document.id,
-      username: data["username"],
-      email: data['email'],
-      password: data['password'],
+      userId: json["user_id"],
+      username: json["username"],
+      email: json["email"],
+      profileImage: json["profile_image"],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "user_id": userId,
+      "username": username,
+      "email": email,
+      "profile_image": profileImage,
+    };
+  }
+}
+
+List<UserModel> userModelFromJson(String str) {
+  final List<dynamic> jsonData = json.decode(str);
+  return jsonData.map((json) => UserModel.fromJson(json)).toList();
+}
+
+String userModelToJson(List<UserModel> data) {
+  final List<Map<String, dynamic>> jsonData =
+  data.map((user) => user.toJson()).toList();
+  return json.encode(jsonData);
 }

@@ -8,14 +8,13 @@ async function createTable() {
     // SQL query to create the "users" table
     const createTableQuery = `
       CREATE TABLE IF NOT EXISTS users (
-        user_id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id VARCHAR(255) PRIMARY KEY NOT NULL,
         username VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
-        user_image VARCHAR(255)
+        profile_image VARCHAR(255)
       )
     `;
 
-    // SQL query to create the "post" table
     // SQL query to create the "post" table with a default value for 'likes'
     const createPostTableQuery = `
       CREATE TABLE IF NOT EXISTS post (

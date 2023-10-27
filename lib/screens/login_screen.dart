@@ -1,3 +1,4 @@
+import 'package:adoptme/components/custom_snackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -89,16 +90,24 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           Column(
             children: [
-              const SizedBox(height: 50),
-              Image.network(
-                "https://www.creativefabrica.com/wp-content/uploads/2020/09/01/Dog-paw-vector-icon-logo-design-heart-Graphics-5223218-1.jpg",
-                height: 200,
-                errorBuilder: (context, error, stackTrace) {
-                  return SizedBox(
-                    height: 200,
-                    child: Image.asset('assets/images/image_not_available.png'),
-                  );
-                },
+              const SizedBox(height: 85),
+              Container(
+                height: 150,
+                width: 150,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 25),
               const Padding(
@@ -138,42 +147,39 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-              GestureDetector(
-                onTap: () async {
-                  if (_formKey.currentState!.validate()) {
-                    User? user = await AuthHelper.loginEmailAndPassword(
-                      _emailController.text.trim(),
-                      _passwordController.text.trim(),
-                    );
-
-                    if (user == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Login Failed"),
-                        ),
-                      );
-                    } else {
-                      // Fetch user information
-                      /*final UserModel userData = await UserRepository.instance.getUserInfo(_emailController.text.trim());
-                      print(userData);*/
-                      // Navigate to the next screen and pass the user information
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => ItemMainScreen(),
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: const MyButton(
-                  textString: 'Sign In',
-                ),
-              ),
+              _buildLoginBtn(),
               const SizedBox(height: 50),
               _buildRegisterBtn(),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLoginBtn() {
+    return GestureDetector(
+      onTap: () async {
+        if (_formKey.currentState!.validate()) {
+          User? user = await AuthHelper.loginEmailAndPassword(
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+          );
+          if (user == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              CustomSnackBar(errorText: 'Email or password may be incorrect'),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const ItemMainScreen(),
+              ),
+            );
+          }
+        }
+      },
+      child: const MyButton(
+        textString: 'Sign In',
       ),
     );
   }

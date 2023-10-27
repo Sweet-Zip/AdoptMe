@@ -29,15 +29,26 @@ class _SettingScreenState extends State<SettingScreen> {
   Widget _buildBody() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(top: 100.0),
+        padding: const EdgeInsets.only(top: 70.0),
         child: Column(
           children: [
-            ClipOval(
-              child: Image.network(
-                'https://www.creativefabrica.com/wp-content/uploads/2020/09/01/Dog-paw-vector-icon-logo-design-heart-Graphics-5223218-1.jpg',
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
+            Container(
+              height: 120,
+              width: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 0.5),
+              ),
+              child: ClipOval(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Image.asset(
+                    'assets/images/app_logo.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.fitHeight,
+                  ),
+                ),
               ),
             ),
             const SizedBox(
@@ -49,10 +60,7 @@ class _SettingScreenState extends State<SettingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: Card(
                 child: SizedBox(
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width,
+                  width: MediaQuery.of(context).size.width,
                   child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -62,10 +70,10 @@ class _SettingScreenState extends State<SettingScreen> {
                             text: 'Profile Setting',
                             color: Colors.grey.shade700,
                             onPressed: () {
-                              Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (context) {
-                                    return const ProfileSetting();
-                                  }));
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) {
+                                return const ProfileSetting();
+                              }));
                             },
                           ),
                           CustomRow(
@@ -73,10 +81,10 @@ class _SettingScreenState extends State<SettingScreen> {
                             text: 'Preference',
                             color: Colors.grey.shade700,
                             onPressed: () {
-                              Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (context) {
-                                    return const PreferenceScreen();
-                                  }));
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) {
+                                return const PreferenceScreen();
+                              }));
                             },
                           ),
                           CustomRow(
@@ -84,10 +92,10 @@ class _SettingScreenState extends State<SettingScreen> {
                             text: 'Change Password',
                             color: Colors.grey.shade700,
                             onPressed: () {
-                              Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (context) {
-                                    return const ChangePasswordScreen();
-                                  }));
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) {
+                                return const ChangePasswordScreen();
+                              }));
                             },
                           ),
                           CustomRow(
@@ -95,15 +103,14 @@ class _SettingScreenState extends State<SettingScreen> {
                             text: 'About',
                             color: Colors.grey.shade700,
                             onPressed: () {
-                              Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (context) {
-                                    return const AboutScreen();
-                                  }));
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) {
+                                return const AboutScreen();
+                              }));
                             },
                           ),
                         ],
-                      )
-                  ),
+                      )),
                 ),
               ),
             ),
@@ -119,19 +126,19 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
-    Widget _buildSignOutBtn() {
-      return GestureDetector(
-        onTap: () async {
-          await FirebaseAuth.instance.signOut();
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => LoginScreen(),
-            ),
-          );
-        },
-        child: const MyButton(
-          textString: 'Sign Out',
-        ),
-      );
-    }
+  Widget _buildSignOutBtn() {
+    return GestureDetector(
+      onTap: () async {
+        await FirebaseAuth.instance.signOut();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => LoginScreen(),
+          ),
+        );
+      },
+      child: const MyButton(
+        textString: 'Sign Out',
+      ),
+    );
   }
+}
