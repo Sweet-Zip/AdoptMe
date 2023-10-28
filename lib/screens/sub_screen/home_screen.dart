@@ -1,6 +1,14 @@
+import 'dart:convert';
+
+import 'package:adoptme/logic/user_logic.dart';
+import 'package:adoptme/models/post_model.dart';
+import 'package:adoptme/screens/sub_screen/view_profile.dart';
+import 'package:adoptme/services/post_service.dart';
+import 'package:adoptme/services/user_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:http/http.dart' as http;
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,7 +21,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isFavorite = false;
   bool isLike = false;
-  String phoneNumber = '1234567890';
+  final String? _phoneNumber = null;
+  PostService postService = PostService();
+  UserService userService = UserService();
+  UserLogic userLogic = UserLogic();
+  String? username;
 
   @override
   Widget build(BuildContext context) {
@@ -34,23 +46,105 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPageViewBuilder() {
-    return PageView.builder(
-      physics: BouncingScrollPhysics(),
-      itemBuilder: (context, index) {
-        return _buildPageItem();
+    return FutureBuilder<List<PostModel>>(
+      future: postService.getAllPosts(), // Fetch posts asynchronously
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While waiting for data, you can display a loading indicator.
+          return const CircularProgressIndicator(); // or any other loading widget
+        } else if (snapshot.hasError) {
+          // Handle errors if the data fetch fails.
+          return Text('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          // Handle the case where no data is available.
+          return Center(
+              child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/app_logo.png',
+                  width: 200,
+                  color: Colors.red,
+                  fit: BoxFit.fitWidth,
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  '404 Error Not Found! Please Comeback later',
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ));
+        } else {
+          final List<PostModel>? postDataList = snapshot.data;
+          return PageView.builder(
+            physics: const BouncingScrollPhysics(),
+            itemBuilder: (context, index) {
+              if (index < postDataList.length) {
+                return FutureBuilder<String>(
+                  future: userService.fetchUserData(postDataList[index].userId),
+                  builder: (context, userSnapshot) {
+                    if (userSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      // While waiting for user data, you can display a loading indicator.
+                      return const CircularProgressIndicator();
+                    } else if (userSnapshot.hasError) {
+                      // Handle errors if the user data fetch fails.
+                      return Text('User Error: ${userSnapshot.error}');
+                    } else {
+                      final String? username = userSnapshot.data;
+                      return _buildPageItem(
+                        postDataList[index].userId,
+                        postDataList[index].image,
+                        postDataList[index].caption,
+                        username ?? '',
+                        postDataList[index].contact,
+                      );
+                    }
+                  },
+                );
+              } else {
+                return Container();
+              }
+            },
+            scrollDirection: Axis.vertical,
+            itemCount: postDataList!.length,
+          );
+        }
       },
-      scrollDirection: Axis.vertical,
-      itemCount: 5,
     );
   }
 
-  Widget _buildPageItem() {
+  Widget _buildPageItem(String uid, String imageUrl, String caption,
+      String username, String phoneNumber) {
     return Stack(
       children: [
         Positioned.fill(
           child: Image.network(
-            'https://images.unsplash.com/photo-1596457107504-7f8ba467b685?auto=format&fit=crop&q=80&w=1000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGFuaW1hbCUyMHBvcnRyYWl0fGVufDB8fDB8fHww',
+            imageUrl,
             fit: BoxFit.fitHeight,
+            loadingBuilder: (BuildContext context, Widget child,
+                ImageChunkEvent? loadingProgress) {
+              if (loadingProgress == null) {
+                return child; // If the image is fully loaded, display it
+              } else {
+                return Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                );
+              }
+            },
           ),
         ),
         Positioned(
@@ -60,9 +154,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               InkWell(
                 onTap: () {
+                  print(uid);
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const ProfileScreen(),
+                      builder: (context) => ViewProfile(uid: uid),
                     ),
                   );
                 },
@@ -102,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: isLike ? Colors.red : Colors.white,
                 ),
               ),
-              Text(
+              const Text(
                 '1',
                 style: TextStyle(color: Colors.white),
               ),
@@ -131,18 +226,18 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Pet Owner Needed ASAP",
+                  username,
                   style: TextStyle(fontSize: 20, color: Colors.grey.shade300),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "I’m recently found this dog at the side of the road. Looking for someone to take care of him as soon as possible. The dog is already vaccinated.",
+                  caption,
                   style: TextStyle(color: Colors.grey.shade400),
                 ),
                 const SizedBox(height: 10),
                 InkWell(
                   onTap: () {
-                    _launchPhoneDialer();
+                    _launchPhoneDialer(phoneNumber);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -168,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _launchPhoneDialer() async {
+  void _launchPhoneDialer(String phoneNumber) async {
     Uri url = Uri(scheme: "tel", path: phoneNumber);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);

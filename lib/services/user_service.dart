@@ -85,7 +85,7 @@ class UserService with ChangeNotifier {
     }
   }
 
-  Future readUserID({
+  /*Future readUserID({
     required String id,
     required void Function(List<UserModel>?) onResult,
     required void Function(String?) onReject,
@@ -103,7 +103,29 @@ class UserService with ChangeNotifier {
     } catch (e) {
       onReject("Error: ${e.toString()}");
     }
+  }*/
+
+  Future<void> readUserID({
+    required String id,
+    required void Function(List<UserModel>?) onResult,
+    required void Function(String?) onReject,
+  }) async {
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl/users/$id"));
+      if (response.statusCode == 200) {
+        final responseBody = response.body; // Extract the response body
+        final jsonData = json.decode(responseBody); // Parse the JSON data
+        final userModel = UserModel.fromJson(jsonData); // Convert JSON to UserModel
+        _userList = [userModel]; // Update the _userList with the new UserModel
+        onResult(_userList); // Return the updated _userList
+      } else {
+        onReject("HTTP Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      onReject("Error: ${e.toString()}");
+    }
   }
+
 
   List<UserModel> _convertData(dynamic data) {
     if (data is List) {
@@ -115,5 +137,23 @@ class UserService with ChangeNotifier {
     } else {
       return [];
     }
+  }
+
+  Future<String> fetchUserData(String userId) async {
+    final url = '$_baseUrl/users/$userId';
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final userData = json.decode(response.body);
+      final username = userData['username'];
+      return username;
+    } else if (response.statusCode == 404) {
+      // User not found
+      print('User not found');
+    } else {
+      // Handle other error cases
+      print('Error: ${response.statusCode}');
+    }
+    return ''; // Return an empty string if there was an error
   }
 }

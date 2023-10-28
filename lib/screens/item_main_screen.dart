@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'add_post_screen.dart';
+import 'sub_screen/add_post_screen.dart';
 import 'sub_screen/category_screen.dart';
 import 'sub_screen/home_screen.dart';
 import 'sub_screen/profile_screen.dart';

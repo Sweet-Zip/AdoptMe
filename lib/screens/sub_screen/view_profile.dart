@@ -8,24 +8,32 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import '../../components/my_button.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class ViewProfile extends StatefulWidget {
+  const ViewProfile({super.key, required this.uid});
+
+  final String uid;
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<ViewProfile> createState() => _ViewProfileState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen>
+class _ViewProfileState extends State<ViewProfile>
     with SingleTickerProviderStateMixin {
   String phoneNumber = '1234567890';
   UserLogic userLogic = UserLogic();
-  User? user = FirebaseAuth.instance.currentUser;
   PostService postService = PostService();
   String? profileUrl;
   String? username;
+  String? uid;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    print(widget.uid);
     return Scaffold(
       body: SafeArea(
         child: _buildBody(),
@@ -33,11 +41,17 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
+  /*Widget _buildBody(){
+    return Center(
+      child: Text(uid!),
+    );
+  }*/
+
   Widget _buildBody() {
-    String uid = user!.uid;
+    var uid = widget.uid;
     userLogic.readUserById(id: uid);
-    profileUrl = userLogic.profileImage;
-    username = userLogic.username;
+    profileUrl = userLogic.profileImage ?? '';
+    username = userLogic.username ?? '';
 
     Future<List<dynamic>> postsFuture = postService.getPostsByUserId(uid);
 
@@ -60,14 +74,13 @@ class _ProfileScreenState extends State<ProfileScreen>
           );
         }
 
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data == null) {
           return const Scaffold(
             body: Center(
               child: Text('No data available'),
             ),
           );
         }
-
         return CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
@@ -106,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildUserInfo(String? username, String profileImage) {
+  Widget _buildUserInfo(String username, String profileImage) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20),
@@ -183,7 +196,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.no_photography_rounded,size: 48,),
+                  const Icon(
+                    Icons.no_photography_rounded,
+                    size: 48,
+                  ),
                   const SizedBox(height: 5),
                   SizedBox(
                     width: 200,

@@ -15,17 +15,28 @@ async function createTable() {
       )
     `;
 
-    // SQL query to create the "post" table with a default value for 'likes'
     const createPostTableQuery = `
       CREATE TABLE IF NOT EXISTS post (
         post_id INT AUTO_INCREMENT PRIMARY KEY,
         caption TEXT,
-        user_id INT,
-        likes INT DEFAULT 0, -- Set default value to 0
+        user_id VARCHAR(255),
+        likes INT DEFAULT 0,
         contact VARCHAR(255),
+        image VARCHAR(255),
+        animal_type VARCHAR(50) -- Adjust the data type and length as needed
+      )
+    `;
+
+    const createAnimalTypeTableQuery = `
+      CREATE TABLE IF NOT EXISTS animal_type (
+        type_id INT AUTO_INCREMENT PRIMARY KEY,
+        type_name VARCHAR(255) NOT NULL,
+        UNIQUE (type_name),
         image VARCHAR(255)
       )
     `;
+
+
 
 
     // Execute the query to create the "users" table
@@ -33,6 +44,9 @@ async function createTable() {
 
     // Execute the query to create the "post" table
     await connection.query(createPostTableQuery);
+
+    // Execute the query to create the "post" table
+    await connection.query(createAnimalTypeTableQuery);
 
     // Release the database connection
     connection.release();

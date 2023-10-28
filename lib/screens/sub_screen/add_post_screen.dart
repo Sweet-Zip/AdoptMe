@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:adoptme/components/custom_snackbar.dart';
 import 'package:adoptme/components/custom_textFormField.dart';
 import 'package:adoptme/components/my_appbar.dart';
 import 'package:adoptme/components/my_button.dart';
@@ -42,9 +44,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   final picker = ImagePicker();
   File? _image;
+  String? imageUrl;
+  bool _isUploading = false;
 
-  //Image Picker function to get image from gallery
-  Future getImageFromGallery() async {
+  Future<void> getImageFromGallery() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
@@ -54,7 +57,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     });
   }
 
-  Future getImageFromCamera() async {
+  Future<void> getImageFromCamera() async {
     final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
     setState(() {
@@ -133,32 +136,70 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       ),
               ),
               const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 25),
-                child: GestureDetector(
-                  onTap: () async {
-                    String uid = user!.uid;
-                    print(
-                        '$uid ${_captionController.text}, ${_contactController.text}');
-                    try {
-                      // Call the addPost method
-                      await postLogic.addPost(
-                        userId: uid,
-                        caption: _captionController.text,
-                        contact: _contactController.text,
-                        image: 'Test',
+              InkWell(
+                child: const MyButton(textString: 'Post'),
+                onTap: () async {
+                  String? uid = user?.uid;
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    // Prevent dialog dismissal on tap outside
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Loading'), // Dialog title
+                        content: SingleChildScrollView(
+                          child: ListBody(
+                            children: <Widget>[
+                              SpinKitChasingDots(
+                                itemBuilder: (BuildContext context, int index) {
+                                  return DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(25),
+                                      color: index.isEven
+                                          ? const Color(0xffff1b7d)
+                                          : const Color(0xff54e8f3),
+                                    ),
+                                  );
+                                },
+                              ),
+                              // Loading indicator inside the dialog
+                              const SizedBox(height: 16.0),
+                              const Text('Posting...'),
+                              // Loading message
+                            ],
+                          ),
+                        ),
                       );
-                      print('Post addition successful');
-                    } catch (e) {
-                      print('Error adding post: $e');
-                      rethrow; // Rethrow the exception to propagate it
-                    }
-                  },
-                  child: const MyButton(
-                    textString: 'Post',
-                  ),
-                ),
-              )
+                    },
+                  );
+                  try {
+                    await postLogic.handlePostTap(
+                      userId: uid!,
+                      caption: _captionController.text,
+                      contact: _contactController.text,
+                      animalType: _typeAheadController.text,
+                      image: _image,
+                      onResult: (imageUrl) {
+                        _captionController.text = '';
+                        _contactController.text = '';
+                        _typeAheadController.text = '';
+                        setState(() {
+                          _image = null;
+                        });
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      onReject: (error) {
+                        // Handle the error
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                    );
+                  } catch (e) {
+                    // Handle the error
+                    Navigator.of(context).pop(); // Close the dialog
+                  }
+                  // Rest of your code
+                },
+              ),
             ],
           ),
         ),
@@ -222,7 +263,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
             print('Selected: $suggestion');
           },
           validator: (value) => value!.isEmpty ? 'Select animal type' : null,
-          onSaved: (value) => selectedValue = value,
+          onSaved: (value) {
+            selectedValue = value;
+          },
         ),
       ),
     );
