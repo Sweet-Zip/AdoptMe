@@ -17,18 +17,40 @@ class ViewProfile extends StatefulWidget {
   State<ViewProfile> createState() => _ViewProfileState();
 }
 
-class _ViewProfileState extends State<ViewProfile>
-    with SingleTickerProviderStateMixin {
+class _ViewProfileState extends State<ViewProfile> {
   String phoneNumber = '1234567890';
   UserLogic userLogic = UserLogic();
   PostService postService = PostService();
-  String? profileUrl;
-  String? username;
+  String profileUrl ='';
+  String username ='';
   String? uid;
+  List<dynamic> postsData = [];
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    loadViewUser();
+  }
+
+  Future<void> loadViewUser() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    userLogic.loadViewUser(
+      uid: widget.uid,
+      profileImage: userLogic.profileImage!.isNotEmpty == true ? userLogic.profileImage : null,
+      username: userLogic.username!.isNotEmpty == true ? userLogic.username : null,
+      updateState: (bool isLoading, String profileUrl, String username, List<dynamic> postsData) {
+        setState(() {
+          this.isLoading = isLoading;
+          this.profileUrl = profileUrl;
+          this.username = username;
+          this.postsData = postsData;
+        });
+      },
+    );
   }
 
   @override
@@ -48,74 +70,45 @@ class _ViewProfileState extends State<ViewProfile>
   }*/
 
   Widget _buildBody() {
-    var uid = widget.uid;
-    userLogic.readUserById(id: uid);
-    profileUrl = userLogic.profileImage ?? '';
-    username = userLogic.username ?? '';
-
-    Future<List<dynamic>> postsFuture = postService.getPostsByUserId(uid);
-
-    return FutureBuilder<List<dynamic>>(
-      future: postsFuture,
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData || snapshot.data == null) {
-          return const Scaffold(
-            body: Center(
-              child: Text('No data available'),
-            ),
-          );
-        }
-        return CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              automaticallyImplyLeading: ModalRoute.of(context)?.canPop ?? true,
-              expandedHeight: 300,
-              pinned: false,
-              floating: false,
-              iconTheme: IconThemeData(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.grey.shade700,
+    return isLoading
+        ? Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    )
+        : CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverAppBar(
+          automaticallyImplyLeading: ModalRoute.of(context)?.canPop ?? true,
+          expandedHeight: 300,
+          pinned: false,
+          floating: false,
+          iconTheme: IconThemeData(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.grey.shade700,
+          ),
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.background,
               ),
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background,
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                      ),
-                    ),
-                    child: _buildUserInfo(username!, profileUrl!),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.background,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10),
                   ),
                 ),
+                child: _buildUserInfo(username!, profileUrl!),
               ),
             ),
-            _buildGridView(snapshot.data!, uid, username!),
-          ],
-        );
-      },
+          ),
+        ),
+        _buildGridView(postsData, widget.uid, username!),
+      ],
     );
   }
 

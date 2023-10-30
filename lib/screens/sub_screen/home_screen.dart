@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Positioned.fill(
           child: Image.network(
             imageUrl,
-            fit: BoxFit.fitHeight,
+            fit: BoxFit.fitWidth,
             loadingBuilder: (BuildContext context, Widget child,
                 ImageChunkEvent? loadingProgress) {
               if (loadingProgress == null) {

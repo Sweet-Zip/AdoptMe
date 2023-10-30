@@ -5,7 +5,7 @@ import 'dart:convert';
 import '../models/post_model.dart';
 
 class PostService with ChangeNotifier {
-  final String _baseUrl = 'http://192.168.56.1:3000/api';
+  final String _baseUrl = 'http://192.168.207.23:3000/api';
 
   Future<List<PostModel>> getAllPosts() async {
     try {

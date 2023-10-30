@@ -1,3 +1,4 @@
+import 'package:adoptme/services/post_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -117,5 +118,28 @@ class UserLogic with ChangeNotifier {
     }
   }
 
+  Future<void> loadViewUser({
+    required String uid,
+    String? profileImage,
+    String? username,
+    required Function(bool isLoading, String profileUrl, String username, List<dynamic> postsData) updateState,
+  }) async {
+    readUserById(id: uid);
+    profileImage ??= '';
+    username ??= '';
 
+    Future<List<dynamic>> postsFuture = PostService().getPostsByUserId(uid);
+
+    // Fetch the user data and posts data simultaneously
+    List<dynamic> postsData = await postsFuture;
+
+    // Check if the user data and posts data are available
+    if (profileImage == null || username == null || postsData == null) {
+      // Data is not available, show loading
+      updateState(true, profileImage!, username!, []);
+    } else {
+      // Data is available, update the UI with the fetched data
+      updateState(false, profileImage!, username!, postsData);
+    }
+  }
 }
