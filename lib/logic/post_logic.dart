@@ -6,12 +6,54 @@ import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../models/post_model.dart';
+
 class PostLogic with ChangeNotifier {
+  List<PostModel>? _postList;
+
+  List<PostModel>? get postList => _postList;
+
+  bool _loading = false;
+
+  bool get loading => _loading;
+
+  String? _error;
+
+  String? get error => _error;
+
   PostService postService = PostService();
   bool _isPosting = false; // Initialize as false
 
   bool get isPosting => _isPosting;
   String? _imageUrl;
+
+  void setLoading() {
+    _loading = true;
+    notifyListeners();
+  }
+
+  Future<void> readPosts() async {
+    setLoading();
+    try {
+      await PostService.getAllPosts(
+        onResult: (result) => _postList = result,
+        onReject: (e) => _error = e,
+      );
+    } catch (e) {
+      _error = e.toString();
+    }
+    _loading = false;
+    notifyListeners();
+  }
+
+  Future readItem() async {
+    await PostService.getAllPosts(
+      onResult: (result) => _postList = result,
+      onReject: (e) => _error = e,
+    );
+    _loading = false;
+    notifyListeners();
+  }
 
   Future<void> addPost({
     required String userId,
@@ -119,7 +161,8 @@ class PostLogic with ChangeNotifier {
               );
               print(
                   'Post addition successful $userId $caption, $contact, $animalType');
-              onResult(_imageUrl); // Invoke the onResult callback with the imageUrl
+              onResult(
+                  _imageUrl); // Invoke the onResult callback with the imageUrl
             } catch (e) {
               print('Error adding post: $e');
               onReject(e); // Invoke the onReject callback with the error
@@ -127,7 +170,8 @@ class PostLogic with ChangeNotifier {
           } else {
             // Handle the case when imageUrl is null (show an error message or take appropriate action)
             print('Error: imageUrl is null');
-            onReject('Error: imageUrl is null'); // Invoke the onReject callback with an error message
+            onReject(
+                'Error: imageUrl is null'); // Invoke the onReject callback with an error message
           }
         },
         onReject: (error) {

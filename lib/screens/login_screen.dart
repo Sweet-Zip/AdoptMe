@@ -1,4 +1,6 @@
 import 'package:adoptme/components/custom_snackbar.dart';
+import 'package:adoptme/components/loading.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -37,23 +39,29 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   String _errorMessage = '';
 
-  bool isEmailValid(String email) {
-    // Regular expression pattern for a basic email validation
-    final RegExp emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$');
-    return emailRegex.hasMatch(email);
-  }
-
   UserLogic userLogic = UserLogic();
 
   Widget _buildTextField() {
     return Column(
       children: [
-        CustomTextField(
-          hintText: 'Email',
-          obscureText: false,
-          controller: _emailController,
-          validValue: 'Please input valid email',
-          inputType: TextInputType.emailAddress,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: TextFormField(
+            controller: _emailController,
+            obscureText: false,
+            validator: (value) => EmailValidator.validate(value!)
+                ? null
+                : 'Please input valid email',
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              hintText: 'Email',
+              enabledBorder: outLine(Theme.of(context).colorScheme.primary),
+              focusedBorder: outLine(Theme.of(context).colorScheme.primary),
+              errorBorder: outLine(Colors.red),
+              focusedErrorBorder:
+              outLine(Theme.of(context).colorScheme.primary),
+            ),
+          ),
         ),
         const SizedBox(
           height: 15,
@@ -161,15 +169,18 @@ class _LoginScreenState extends State<LoginScreen> {
     return GestureDetector(
       onTap: () async {
         if (_formKey.currentState!.validate()) {
+          Loading(context: context).showLoading();
           User? user = await AuthHelper.loginEmailAndPassword(
             _emailController.text.trim(),
             _passwordController.text.trim(),
           );
           if (user == null) {
+            Loading(context: context).dismissLoading();
             ScaffoldMessenger.of(context).showSnackBar(
               CustomSnackBar(errorText: 'Email or password may be incorrect'),
             );
           } else {
+
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const ItemMainScreen(),
@@ -183,6 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
 
   Widget _buildForgotPass() {
     return GestureDetector(
@@ -227,6 +239,13 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         )
       ],
+    );
+  }
+
+  OutlineInputBorder outLine(Color color) {
+    return OutlineInputBorder(
+      borderSide: BorderSide(color: color, width: 1.5),
+      borderRadius: BorderRadius.circular(10.0),
     );
   }
 }

@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatefulWidget {
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.hintText,
     required this.controller,
     required this.obscureText,
-    required this.validValue, required this.inputType,
-  }) : super(key: key);
+    required this.validValue,
+    required this.inputType,
+  });
 
   final String hintText;
   final TextEditingController controller;
   final bool obscureText;
-  final String validValue;
+  final String? validValue;
   final TextInputType inputType;
 
   @override

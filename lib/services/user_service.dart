@@ -15,7 +15,7 @@ class UserService with ChangeNotifier {
     notifyListeners();
   }
 
-  final String _baseUrl = 'http://192.168.207.23:3000/api';
+  final String _baseUrl = 'http://192.168.50.115:3000/api';
 
   Future<void> loginUser(String email, String password) async {
     final endpoint =
@@ -115,7 +115,8 @@ class UserService with ChangeNotifier {
       if (response.statusCode == 200) {
         final responseBody = response.body; // Extract the response body
         final jsonData = json.decode(responseBody); // Parse the JSON data
-        final userModel = UserModel.fromJson(jsonData); // Convert JSON to UserModel
+        final userModel =
+            UserModel.fromJson(jsonData); // Convert JSON to UserModel
         _userList = [userModel]; // Update the _userList with the new UserModel
         onResult(_userList); // Return the updated _userList
       } else {
@@ -123,19 +124,6 @@ class UserService with ChangeNotifier {
       }
     } catch (e) {
       onReject("Error: ${e.toString()}");
-    }
-  }
-
-
-  List<UserModel> _convertData(dynamic data) {
-    if (data is List) {
-      return data
-          .map((item) => UserModel.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } else if (data is Map<String, dynamic>) {
-      return [UserModel.fromJson(data)];
-    } else {
-      return [];
     }
   }
 
@@ -155,5 +143,10 @@ class UserService with ChangeNotifier {
       print('Error: ${response.statusCode}');
     }
     return ''; // Return an empty string if there was an error
+  }
+
+  List<UserModel> _convertData(String data) {
+    List<UserModel> list = userModelFromJson(data);
+    return list;
   }
 }

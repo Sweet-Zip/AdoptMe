@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
+import '../../components/loading.dart';
 import '../../components/my_button.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -21,8 +22,36 @@ class _ProfileScreenState extends State<ProfileScreen>
   UserLogic userLogic = UserLogic();
   User? user = FirebaseAuth.instance.currentUser;
   PostService postService = PostService();
-  String? profileUrl;
-  String? username;
+  bool isLoading = false;
+  String? uid;
+  List<dynamic> postsData = [];
+  String profileUrl = '';
+  String username = '';
+
+  @override
+  void initState() {
+    super.initState();
+    loadViewUser();
+  }
+
+  Future<void> loadViewUser() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    userLogic.loadViewUser(
+      uid: user!.uid,
+      updateState: (bool isLoading, String profileUrl, String username,
+          List<dynamic> postsData) {
+        setState(() {
+          this.isLoading = isLoading;
+          this.profileUrl = profileUrl;
+          this.username = username;
+          this.postsData = postsData;
+        });
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,76 +63,45 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Widget _buildBody() {
-    String uid = user!.uid;
-    userLogic.readUserById(id: uid);
-    profileUrl = userLogic.profileImage;
-    username = userLogic.username;
-
-    Future<List<dynamic>> postsFuture = postService.getPostsByUserId(uid);
-
-    return FutureBuilder<List<dynamic>>(
-      future: postsFuture,
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData) {
-          return const Scaffold(
-            body: Center(
-              child: Text('No data available'),
-            ),
-          );
-        }
-
-        return CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              automaticallyImplyLeading: ModalRoute.of(context)?.canPop ?? true,
-              expandedHeight: 300,
-              pinned: false,
-              floating: false,
-              iconTheme: IconThemeData(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : Colors.grey.shade700,
-              ),
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background,
-                  ),
-                  child: Container(
+    return isLoading
+        ? Scaffold(
+            body: Loading(context: context).buildLoading()
+          )
+        : CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                automaticallyImplyLeading:
+                    ModalRoute.of(context)?.canPop ?? true,
+                expandedHeight: 300,
+                pinned: false,
+                floating: false,
+                iconTheme: IconThemeData(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.grey.shade700,
+                ),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.background,
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(10),
-                        bottomRight: Radius.circular(10),
-                      ),
                     ),
-                    child: _buildUserInfo(username!, profileUrl!),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.background,
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
+                        ),
+                      ),
+                      child: _buildUserInfo(username, profileUrl),
+                    ),
                   ),
                 ),
               ),
-            ),
-            _buildGridView(snapshot.data!, uid, username!),
-          ],
-        );
-      },
-    );
+              _buildGridView(postsData, user!.uid, username),
+            ],
+          );
   }
 
   Widget _buildUserInfo(String? username, String profileImage) {
@@ -114,9 +112,9 @@ class _ProfileScreenState extends State<ProfileScreen>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipOval(
-              child: (profileUrl != null && profileUrl != '')
+              child: (profileUrl != '')
                   ? Image.network(
-                      profileUrl!,
+                      profileUrl,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
                         'assets/images/image_not_found.jpg',
                         width: 100,
@@ -183,7 +181,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.no_photography_rounded,size: 48,),
+                  const Icon(
+                    Icons.no_photography_rounded,
+                    size: 48,
+                  ),
                   const SizedBox(height: 5),
                   SizedBox(
                     width: 200,

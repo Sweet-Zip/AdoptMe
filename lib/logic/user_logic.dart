@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adoptme/services/post_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,6 +61,11 @@ class UserLogic with ChangeNotifier {
 
   UserService userService = UserService();
 
+  UserModel? getUserById(String id) {
+    UserModel? user = _userList?.firstWhere((element) => element.userId == id);
+    return user;
+  }
+
   Future<void> registerUser(
       {required BuildContext context,
       required userID,
@@ -85,22 +92,20 @@ class UserLogic with ChangeNotifier {
     required String id,
   }) async {
     print('Authenticated id: $id');
-
     try {
       await userService.readUserID(
         id: id,
         onResult: (List<UserModel>? users) {
           if (users != null && users.isNotEmpty) {
-            // Create a new UserModel object with the data from the API
-            UserModel newUser = users[0];
+            for (UserModel newUser in users) {
+              // Update the UserModel with the new data
+              authenticatedId = newUser.userId;
+              username = newUser.username;
+              email = newUser.email;
+              profileImage = newUser.profileImage;
 
-            // Update the UserModel with the new data
-            authenticatedId = newUser.userId;
-            username = newUser.username;
-            email = newUser.email;
-            profileImage = newUser.profileImage;
-
-            print('Query was successful. Usernames: $username');
+              print('Query was successful. Usernames: $username');
+            }
           } else {
             print('No users found or an error occurred.');
           }
@@ -120,8 +125,6 @@ class UserLogic with ChangeNotifier {
 
   Future<void> loadViewUser({
     required String uid,
-    String? profileImage,
-    String? username,
     required Function(bool isLoading, String profileUrl, String username, List<dynamic> postsData) updateState,
   }) async {
     readUserById(id: uid);
@@ -134,7 +137,7 @@ class UserLogic with ChangeNotifier {
     List<dynamic> postsData = await postsFuture;
 
     // Check if the user data and posts data are available
-    if (profileImage == null || username == null || postsData == null) {
+    if (profileImage == null || username == null) {
       // Data is not available, show loading
       updateState(true, profileImage!, username!, []);
     } else {

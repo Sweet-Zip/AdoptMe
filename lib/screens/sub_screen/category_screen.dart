@@ -16,23 +16,7 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  bool _isLoading = true;
   CategoryService categoryService = CategoryService();
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Show the skeleton for 3 seconds
-    Future.delayed(const Duration(seconds: 15), () {
-      if (mounted) {
-        setState(() {
-          // After 3 seconds, change to the actual content
-          _isLoading = false;
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +24,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
       appBar: const MyAppBar(
         title: 'Category',
       ),
-      body: _isLoading ? _buildSkeleton() : _buildBody(),
+      body: _buildBody(),
     );
   }
 
@@ -73,10 +57,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.2), // Shadow color
-                              spreadRadius: 3, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset: const Offset(0, 1), // Offset of the shadow
+                              color: Colors.grey.withOpacity(0.2),
+                              // Shadow color
+                              spreadRadius: 3,
+                              // Spread radius
+                              blurRadius: 5,
+                              // Blur radius
+                              offset:
+                                  const Offset(0, 1), // Offset of the shadow
                             ),
                           ],
                         ),
@@ -84,21 +72,24 @@ class _CategoryScreenState extends State<CategoryScreen> {
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
                             animalType.image,
-                            loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                            loadingBuilder: (BuildContext context, Widget child,
+                                ImageChunkEvent? loadingProgress) {
                               if (loadingProgress == null) {
                                 return child; // If the image is fully loaded, display it
                               } else {
                                 return Center(
                                   child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                    value: loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                .cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
                                         : null,
                                   ),
                                 );
                               }
                             },
                           ),
-
                         ),
                       ),
                       Positioned(
@@ -112,8 +103,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             color: Colors.white,
                             shadows: [
                               Shadow(
-                                color: Colors.black, // Shadow color
-                                offset: Offset(1, 1), // Horizontal and vertical offset
+                                color: Colors.black,
+                                // Shadow color
+                                offset: Offset(1, 1),
+                                // Horizontal and vertical offset
                                 blurRadius: 1, // Shadow blur radius
                               ),
                             ],
@@ -127,7 +120,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
               itemCount: animalTypes.length,
             ),
           );
-
         } else {
           return const SizedBox(); // Return an empty SizedBox when there is no data
         }

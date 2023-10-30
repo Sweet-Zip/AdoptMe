@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../logic/post_logic.dart';
 import 'sub_screen/add_post_screen.dart';
 import 'sub_screen/category_screen.dart';
 import 'sub_screen/home_screen.dart';

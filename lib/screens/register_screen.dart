@@ -1,7 +1,9 @@
 import 'package:adoptme/components/custom_snackbar.dart';
+import 'package:adoptme/components/loading.dart';
 import 'package:adoptme/components/my_appbar.dart';
 import 'package:adoptme/helpers/auth_helper.dart';
 import 'package:adoptme/models/user_model.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -98,12 +100,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
           const SizedBox(
             height: 15,
           ),
-          CustomTextField(
-            hintText: 'Email',
-            controller: _emailController,
-            obscureText: false,
-            validValue: 'Please input valid email',
-            inputType: TextInputType.emailAddress,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25),
+            child: TextFormField(
+              controller: _emailController,
+              obscureText: false,
+              validator: (value) => EmailValidator.validate(value!)
+                  ? null
+                  : 'Please input valid email',
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: 'Email',
+                enabledBorder: outLine(Theme.of(context).colorScheme.primary),
+                focusedBorder: outLine(Theme.of(context).colorScheme.primary),
+                errorBorder: outLine(Colors.red),
+                focusedErrorBorder:
+                    outLine(Theme.of(context).colorScheme.primary),
+              ),
+            ),
           ),
           const SizedBox(
             height: 15,
@@ -147,21 +161,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
           String email = _emailController.text;
           String password = _passwordController.text;
           String confirmPass = _confirmPassController.text;
-
+          Loading(context: context).showLoading();
           if (password == confirmPass) {
-            // Passwords match
             dynamic result = await authHelper.registerEmailAndPassword(
               context,
               email,
               password,
               username,
             );
-
             if (result is User) {
               print('Register successful $username email: $email');
+              Loading(context: context).dismissLoading();
             } else if (result is FirebaseAuthException) {
               // Handle registration failure
               if (result.code == 'email-already-in-use') {
+                Loading(context: context).dismissLoading();
                 ScaffoldMessenger.of(context).showSnackBar(
                   CustomSnackBar(errorText: 'Email already in use'),
                 );
@@ -174,6 +188,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             }
           } else {
             // Passwords don't match, display an error
+            Loading(context: context).dismissLoading();
             ScaffoldMessenger.of(context).showSnackBar(
               CustomSnackBar(errorText: 'Passwords do not match'),
             );
@@ -204,6 +219,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  OutlineInputBorder outLine(Color color) {
+    return OutlineInputBorder(
+      borderSide: BorderSide(color: color, width: 1.5),
+      borderRadius: BorderRadius.circular(10.0),
     );
   }
 }

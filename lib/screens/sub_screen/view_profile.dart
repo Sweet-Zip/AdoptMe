@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:adoptme/components/custom_snackbar.dart';
 import 'package:adoptme/logic/user_logic.dart';
 import 'package:adoptme/services/post_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
+import '../../components/loading.dart';
 import '../../components/my_button.dart';
 
 class ViewProfile extends StatefulWidget {
@@ -21,8 +23,8 @@ class _ViewProfileState extends State<ViewProfile> {
   String phoneNumber = '1234567890';
   UserLogic userLogic = UserLogic();
   PostService postService = PostService();
-  String profileUrl ='';
-  String username ='';
+  String profileUrl = '';
+  String username = '';
   String? uid;
   List<dynamic> postsData = [];
   bool isLoading = false;
@@ -40,9 +42,8 @@ class _ViewProfileState extends State<ViewProfile> {
 
     userLogic.loadViewUser(
       uid: widget.uid,
-      profileImage: userLogic.profileImage!.isNotEmpty == true ? userLogic.profileImage : null,
-      username: userLogic.username!.isNotEmpty == true ? userLogic.username : null,
-      updateState: (bool isLoading, String profileUrl, String username, List<dynamic> postsData) {
+      updateState: (bool isLoading, String profileUrl, String username,
+          List<dynamic> postsData) {
         setState(() {
           this.isLoading = isLoading;
           this.profileUrl = profileUrl;
@@ -55,7 +56,6 @@ class _ViewProfileState extends State<ViewProfile> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.uid);
     return Scaffold(
       body: SafeArea(
         child: _buildBody(),
@@ -63,53 +63,48 @@ class _ViewProfileState extends State<ViewProfile> {
     );
   }
 
-  /*Widget _buildBody(){
-    return Center(
-      child: Text(uid!),
-    );
-  }*/
-
   Widget _buildBody() {
     return isLoading
         ? Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    )
+            body: Loading(
+              context: context,
+            ).buildLoading(),
+          )
         : CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        SliverAppBar(
-          automaticallyImplyLeading: ModalRoute.of(context)?.canPop ?? true,
-          expandedHeight: 300,
-          pinned: false,
-          floating: false,
-          iconTheme: IconThemeData(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.grey.shade700,
-          ),
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.background,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(10),
-                    bottomRight: Radius.circular(10),
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                automaticallyImplyLeading:
+                    ModalRoute.of(context)?.canPop ?? true,
+                expandedHeight: 300,
+                pinned: false,
+                floating: false,
+                iconTheme: IconThemeData(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.grey.shade700,
+                ),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.background,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.background,
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
+                        ),
+                      ),
+                      child: _buildUserInfo(username, profileUrl),
+                    ),
                   ),
                 ),
-                child: _buildUserInfo(username!, profileUrl!),
               ),
-            ),
-          ),
-        ),
-        _buildGridView(postsData, widget.uid, username!),
-      ],
-    );
+              _buildGridView(postsData, widget.uid, username),
+            ],
+          );
   }
 
   Widget _buildUserInfo(String username, String profileImage) {
@@ -120,9 +115,9 @@ class _ViewProfileState extends State<ViewProfile> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipOval(
-              child: (profileUrl != null && profileUrl != '')
+              child: (profileUrl != '')
                   ? Image.network(
-                      profileUrl!,
+                      profileUrl,
                       errorBuilder: (context, error, stackTrace) => Image.asset(
                         'assets/images/image_not_found.jpg',
                         width: 100,
@@ -144,7 +139,7 @@ class _ViewProfileState extends State<ViewProfile> {
               height: 10,
             ),
             Text(
-              username ?? 'Username',
+              username,
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(
@@ -282,7 +277,7 @@ class _ViewProfileState extends State<ViewProfile> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
-      print("Can't open dial pad.");
+      CustomSnackBar(errorText: 'Can\'t open call pad,');
     }
   }
 }

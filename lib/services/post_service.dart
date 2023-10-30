@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -5,9 +6,9 @@ import 'dart:convert';
 import '../models/post_model.dart';
 
 class PostService with ChangeNotifier {
-  final String _baseUrl = 'http://192.168.207.23:3000/api';
+  final String _baseUrl = 'http://192.168.50.115:3000/api';
 
-  Future<List<PostModel>> getAllPosts() async {
+  /*Future<List<PostModel>> getAllPosts() async {
     try {
       final url = Uri.parse('$_baseUrl/posts'); // Replace with your API endpoint
       final response = await http.get(url);
@@ -26,6 +27,26 @@ class PostService with ChangeNotifier {
       print('Network error: $e');
       return [];
     }
+  }*/
+
+  static Future getAllPosts({
+    required void Function(List<PostModel>?) onResult,
+    required void Function(String?) onReject,
+  }) async {
+    try {
+      http.Response res = await http.get(
+        Uri.parse('http://192.168.50.115:3000/api/posts/'),
+      );
+      onResult(await compute(_convertData, res.body));
+      onReject(null);
+    } catch (e) {
+      onReject("Error: ${e.toString()}");
+    }
+  }
+
+  static List<PostModel> _convertData(String data) {
+    List<PostModel> list = postModelFromJson(data);
+    return list;
   }
 
   // Method to create a new post
