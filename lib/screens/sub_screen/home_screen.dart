@@ -1,17 +1,12 @@
-import 'dart:convert';
-
 import 'package:adoptme/logic/post_logic.dart';
 import 'package:adoptme/logic/user_logic.dart';
 import 'package:adoptme/models/post_model.dart';
 import 'package:adoptme/screens/sub_screen/view_profile.dart';
 import 'package:adoptme/services/post_service.dart';
 import 'package:adoptme/services/user_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
-import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

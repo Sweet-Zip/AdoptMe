@@ -7,19 +7,17 @@ class Loading {
 
 
   Widget buildLoading(){
-    return Expanded(
-      child: SpinKitChasingDots(
-        itemBuilder: (context, int index) {
-          return DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              color: index.isEven
-                  ? const Color(0xffff1b7d)
-                  : const Color(0xff54e8f3),
-            ),
-          );
-        },
-      ),
+    return SpinKitChasingDots(
+      itemBuilder: (context, int index) {
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: index.isEven
+                ? const Color(0xffff1b7d)
+                : const Color(0xff54e8f3),
+          ),
+        );
+      },
     );
   }
 

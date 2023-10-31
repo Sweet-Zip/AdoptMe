@@ -46,11 +46,15 @@ class PostLogic with ChangeNotifier {
     notifyListeners();
   }
 
-  Future readItem() async {
-    await PostService.getAllPosts(
-      onResult: (result) => _postList = result,
-      onReject: (e) => _error = e,
-    );
+  Future<void> readPostById({
+    required String userId,
+  }) async {
+    setLoading();
+    try {
+      await PostService.getPostsByUserId(userId);
+    } catch (e) {
+      _error = e.toString();
+    }
     _loading = false;
     notifyListeners();
   }

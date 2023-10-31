@@ -6,12 +6,16 @@ import 'package:adoptme/components/custom_textFormField.dart';
 import 'package:adoptme/components/my_appbar.dart';
 import 'package:adoptme/components/my_button.dart';
 import 'package:adoptme/logic/post_logic.dart';
+import 'package:adoptme/models/animal_type_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
+import '../../logic/animal_type_logic.dart';
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -24,7 +28,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _typeAheadController = TextEditingController();
   String? selectedValue;
-  final List<String> _items = ['Dog', 'Cat', 'Bird', 'Fish', 'Other'];
+  final List<AnimalModel> items = [];
   final TextEditingController _captionController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
   User? user = FirebaseAuth.instance.currentUser;
@@ -45,7 +49,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
   final picker = ImagePicker();
   File? _image;
   String? imageUrl;
-  bool _isUploading = false;
 
   Future<void> getImageFromGallery() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -228,46 +231,56 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
   Widget _buildCategory() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
-      child: GestureDetector(
-        onTap: () {
-          _typeAheadController.clear();
-          FocusScope.of(context).unfocus();
-        },
-        child: TypeAheadFormField(
-          textFieldConfiguration: TextFieldConfiguration(
-            controller: _typeAheadController,
-            decoration: InputDecoration(
-              labelText: 'Search Item',
-              suffixIcon: const Icon(Icons.arrow_drop_down),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
+    String? error = context.watch<AnimalTypeLogic>().error;
+    if (error != null) {
+      debugPrint(error);
+      return const Center(child: Text("Something went wrong"));
+    } else {
+      List<AnimalModel>? animalList =
+          context.watch<AnimalTypeLogic>().animalList;
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+        child: GestureDetector(
+          onTap: () {
+            _typeAheadController.clear();
+            FocusScope.of(context).unfocus();
+          },
+          child: TypeAheadFormField(
+            textFieldConfiguration: TextFieldConfiguration(
+              controller: _typeAheadController,
+              decoration: InputDecoration(
+                labelText: 'Search Item',
+                suffixIcon: const Icon(Icons.arrow_drop_down),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
               ),
             ),
+            itemBuilder: (context, AnimalModel suggestion) => ListTile(
+              title: Text(suggestion.typeName), // Display the typeName property of the AnimalModel
+            ),
+            suggestionsCallback: (pattern) {
+              final List<AnimalModel> filteredItems = animalList!
+                  .where((item) =>
+                  item.typeName.toLowerCase().contains(pattern.toLowerCase()))
+                  .toList();
+              return filteredItems;
+            },
+            transitionBuilder: (context, suggestionsBox, controller) =>
+            suggestionsBox,
+            onSuggestionSelected: (AnimalModel suggestion) {
+              _typeAheadController.text =
+                  suggestion.typeName; // Extract the desired value from the AnimalModel
+              print('Selected: ${suggestion.typeName}');
+            },
+            validator: (value) => value!.isEmpty ? 'Select animal type' : null,
+            onSaved: (value) {
+              selectedValue = value;
+            },
           ),
-          itemBuilder: (context, suggestion) => ListTile(
-            title: Text(suggestion),
-          ),
-          suggestionsCallback: (pattern) {
-            final List<String> filteredItems = _items
-                .where((item) =>
-                    item.toLowerCase().contains(pattern.toLowerCase()))
-                .toList();
-            return filteredItems;
-          },
-          transitionBuilder: (context, suggestionsBox, controller) =>
-              suggestionsBox,
-          onSuggestionSelected: (suggestion) {
-            _typeAheadController.text = suggestion;
-            print('Selected: $suggestion');
-          },
-          validator: (value) => value!.isEmpty ? 'Select animal type' : null,
-          onSaved: (value) {
-            selectedValue = value;
-          },
         ),
-      ),
-    );
+      );
+    }
   }
 }

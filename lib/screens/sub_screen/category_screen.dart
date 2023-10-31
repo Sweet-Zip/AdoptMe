@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:adoptme/logic/animal_type_logic.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../components/my_appbar.dart';
@@ -17,6 +19,7 @@ class CategoryScreen extends StatefulWidget {
 
 class _CategoryScreenState extends State<CategoryScreen> {
   CategoryService categoryService = CategoryService();
+  bool showSkeleton = true;
 
   @override
   Widget build(BuildContext context) {
@@ -29,101 +32,94 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   Widget _buildBody() {
-    return FutureBuilder<List<AnimalModel>>(
-      future: categoryService.fetchAnimalTypes(),
-      // Assuming you have implemented the fetchAnimalTypes function as mentioned earlier
-      builder:
-          (BuildContext context, AsyncSnapshot<List<AnimalModel>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildSkeleton();
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Text('Error: ${snapshot.error}'),
-          );
-        } else if (snapshot.hasData) {
-          final List<AnimalModel> animalTypes = snapshot.data!;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: MasonryGridView.count(
-              crossAxisCount: 2,
-              itemBuilder: (BuildContext context, int index) {
-                final AnimalModel animalType = animalTypes[index];
-                return Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              // Shadow color
-                              spreadRadius: 3,
-                              // Spread radius
-                              blurRadius: 5,
-                              // Blur radius
-                              offset:
-                                  const Offset(0, 1), // Offset of the shadow
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            animalType.image,
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child; // If the image is fully loaded, display it
-                              } else {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 15,
-                        left: 10,
-                        child: Text(
-                          animalType.typeName,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black,
-                                // Shadow color
-                                offset: Offset(1, 1),
-                                // Horizontal and vertical offset
-                                blurRadius: 1, // Shadow blur radius
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              itemCount: animalTypes.length,
-            ),
-          );
-        } else {
-          return const SizedBox(); // Return an empty SizedBox when there is no data
-        }
+    String? error = context.watch<AnimalTypeLogic>().error;
+    if (error != null) {
+      debugPrint(error);
+      return const Center(child: Text("Something went wrong"));
+    } else {
+      List<AnimalModel>? animalList =
+          context.watch<AnimalTypeLogic>().animalList;
+      return _buildCustomGridView(animalList);
+    }
+  }
+
+  Widget _buildCustomGridView(List<AnimalModel>? items) {
+    if (items == null) {
+      return const Center(
+        child: Text("Something still went Wrong"),
+      );
+    }
+    return MasonryGridView.count(
+      crossAxisCount: 2,
+      itemCount: items.length,
+      itemBuilder: (BuildContext context, int index) {
+        return _buildItemView(items[index]);
       },
+    );
+  }
+
+  Widget _buildItemView(AnimalModel item) {
+    return Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 3,
+                  blurRadius: 5,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: item.image.isNotEmpty || item.image != ''
+                  ? Image.network(
+                      item.image,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        }
+                      },
+                    )
+                  : Image.asset('assets/images/image_not_found.jpg'),
+            ),
+          ),
+          Positioned(
+            top: 15,
+            left: 10,
+            child: Text(
+              item.typeName,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black,
+                    offset: Offset(1, 1),
+                    blurRadius: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

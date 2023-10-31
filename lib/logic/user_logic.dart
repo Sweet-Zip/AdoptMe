@@ -74,8 +74,6 @@ class UserLogic with ChangeNotifier {
       required profileImage}) async {
     try {
       await UserService().registerUser(userID, username, email, profileImage);
-      // If you want to perform any actions or update the UI after registration, do it here.
-      // For example, you can navigate to a different screen or show a success message.
       print('Registration successful');
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -83,7 +81,6 @@ class UserLogic with ChangeNotifier {
         ),
       );
     } catch (e) {
-      // Handle any errors that might occur when calling the UserService's registerUser function.
       print('Error during registration: $e');
     }
   }
@@ -92,20 +89,22 @@ class UserLogic with ChangeNotifier {
     required String id,
   }) async {
     print('Authenticated id: $id');
+
     try {
       await userService.readUserID(
         id: id,
         onResult: (List<UserModel>? users) {
           if (users != null && users.isNotEmpty) {
-            for (UserModel newUser in users) {
-              // Update the UserModel with the new data
-              authenticatedId = newUser.userId;
-              username = newUser.username;
-              email = newUser.email;
-              profileImage = newUser.profileImage;
+            // Create a new UserModel object with the data from the API
+            UserModel newUser = users[0];
 
-              print('Query was successful. Usernames: $username');
-            }
+            // Update the UserModel with the new data
+            authenticatedId = newUser.userId;
+            username = newUser.username;
+            email = newUser.email;
+            profileImage = newUser.profileImage;
+
+            print('Query was successful. Usernames: $username');
           } else {
             print('No users found or an error occurred.');
           }
@@ -131,7 +130,7 @@ class UserLogic with ChangeNotifier {
     profileImage ??= '';
     username ??= '';
 
-    Future<List<dynamic>> postsFuture = PostService().getPostsByUserId(uid);
+    Future<List<dynamic>> postsFuture = PostService.getPostsByUserId(uid);
 
     // Fetch the user data and posts data simultaneously
     List<dynamic> postsData = await postsFuture;

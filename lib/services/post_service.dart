@@ -87,8 +87,8 @@ class PostService with ChangeNotifier {
     }
   }
 
-  Future<List<dynamic>> getPostsByUserId(String userId) async {
-    final url = '$_baseUrl/posts/user/$userId';
+  static Future<List<dynamic>> getPostsByUserId(String userId) async {
+    final url = 'http://192.168.50.115:3000/api/posts/user/$userId';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {

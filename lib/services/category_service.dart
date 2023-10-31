@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,5 +18,25 @@ class CategoryService with ChangeNotifier {
     } else {
       throw Exception('Failed to fetch animal types');
     }
+  }
+
+  static Future getAllAnimals({
+    required void Function(List<AnimalModel>?) onResult,
+    required void Function(String?) onReject,
+  }) async {
+    try {
+      http.Response res = await http.get(
+        Uri.parse('http://192.168.50.115:3000/api/animal_types/'),
+      );
+      onResult(await compute(_convertData, res.body));
+      onReject(null);
+    } catch (e) {
+      onReject("Error: ${e.toString()}");
+    }
+  }
+
+  static List<AnimalModel> _convertData(String data) {
+    List<AnimalModel> list = animalModelFromJson(data);
+    return list;
   }
 }

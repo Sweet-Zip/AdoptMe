@@ -1,8 +1,11 @@
+import 'package:adoptme/components/loading.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/custom_textFormField.dart';
 import '../../components/my_appbar.dart';
 import '../../components/my_button.dart';
+import '../../helpers/auth_helper.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -62,16 +65,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             // _buildSubmitButton(),
             InkWell(
               onTap: () async {
-                if (_formKey.currentState!.validate())  {
-                  String pass = _passController.text;
-                  String newPass = _newPassController.text;
-                  String conPass = _conPassController.text;
+                if (_formKey.currentState!.validate()) {
+                  try {
+                    String pass = _passController.text;
+                    String newPass = _newPassController.text;
+                    String conPass = _conPassController.text;
+                    await AuthHelper.changePassword(pass, newPass, context);
+                  } catch (e) {}
                 } else {
-
-
+                  // Form validation failed
                 }
               },
-              child: MyButton(textString: 'Submit'),
+              child: const MyButton(textString: 'Submit'),
             ),
           ],
         ),

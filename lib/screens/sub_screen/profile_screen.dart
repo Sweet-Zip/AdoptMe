@@ -94,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           bottomRight: Radius.circular(10),
                         ),
                       ),
-                      child: _buildUserInfo(username, profileUrl),
+                      child: _buildUserInfo(userLogic.username, userLogic.profileImage!),
                     ),
                   ),
                 ),
@@ -114,23 +114,23 @@ class _ProfileScreenState extends State<ProfileScreen>
             ClipOval(
               child: (profileUrl != '')
                   ? Image.network(
-                      profileUrl,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
-                        'assets/images/image_not_found.jpg',
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    )
+                profileUrl,
+                errorBuilder: (context, error, stackTrace) => Image.asset(
+                  'assets/images/image_not_found.jpg',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              )
                   : Image.asset(
-                      'assets/images/image_not_found.jpg',
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
+                'assets/images/image_not_found.jpg',
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(
               height: 10,

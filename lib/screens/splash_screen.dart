@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:adoptme/logic/animal_type_logic.dart';
 import 'package:adoptme/logic/post_logic.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,8 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Future.delayed(const Duration(seconds: 1), () async {
       if (mounted) {
-        await context.read<PostLogic>().readItem();
+        await context.read<PostLogic>().readPosts();
+        await context.read<AnimalTypeLogic>().readAnimal();
 
         FirebaseAuth.instance.authStateChanges().listen((user) async {
           if (user == null) {
