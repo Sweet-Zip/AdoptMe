@@ -3,6 +3,7 @@ import 'package:adoptme/components/loading.dart';
 import 'package:adoptme/components/my_appbar.dart';
 import 'package:adoptme/helpers/auth_helper.dart';
 import 'package:adoptme/models/user_model.dart';
+import 'package:adoptme/screens/login_screen.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -51,103 +52,105 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildBody() {
     return Form(
       key: _formKey,
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          Container(
-            height: 120,
-            width: 120,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-            ),
-            child: ClipOval(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/images/app_logo.png',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.fitHeight,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              height: 120,
+              width: 120,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: ClipOval(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset(
+                    'assets/images/app_logo.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.fitHeight,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 25),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "Register",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                )
-              ],
+            const SizedBox(
+              height: 15,
             ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          CustomTextField(
-            hintText: 'Username',
-            controller: _usernameController,
-            obscureText: false,
-            validValue: 'Please input valid username',
-            inputType: TextInputType.text,
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: TextFormField(
-              controller: _emailController,
-              obscureText: false,
-              validator: (value) => EmailValidator.validate(value!)
-                  ? null
-                  : 'Please input valid email',
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                hintText: 'Email',
-                enabledBorder: outLine(Theme.of(context).colorScheme.primary),
-                focusedBorder: outLine(Theme.of(context).colorScheme.primary),
-                errorBorder: outLine(Colors.red),
-                focusedErrorBorder:
-                    outLine(Theme.of(context).colorScheme.primary),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    "Register",
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  )
+                ],
               ),
             ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          CustomTextField(
-            hintText: 'Password',
-            controller: _passwordController,
-            obscureText: true,
-            validValue: 'Please input valid password',
-            inputType: TextInputType.visiblePassword,
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          CustomTextField(
-            hintText: 'Confirm password',
-            controller: _confirmPassController,
-            obscureText: true,
-            validValue: 'Password not match',
-            inputType: TextInputType.visiblePassword,
-          ),
-          const SizedBox(
-            height: 25,
-          ),
-          _buildRegisterBtn(),
-          const SizedBox(
-            height: 25,
-          ),
-          _buildLoginBtn(),
-        ],
+            const SizedBox(
+              height: 15,
+            ),
+            CustomTextField(
+              hintText: 'Username',
+              controller: _usernameController,
+              obscureText: false,
+              validValue: 'Please input valid username',
+              inputType: TextInputType.text,
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: TextFormField(
+                controller: _emailController,
+                obscureText: false,
+                validator: (value) => EmailValidator.validate(value!)
+                    ? null
+                    : 'Please input valid email',
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'Email',
+                  enabledBorder: outLine(Theme.of(context).colorScheme.primary),
+                  focusedBorder: outLine(Theme.of(context).colorScheme.primary),
+                  errorBorder: outLine(Colors.red),
+                  focusedErrorBorder:
+                      outLine(Theme.of(context).colorScheme.primary),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            CustomTextField(
+              hintText: 'Password',
+              controller: _passwordController,
+              obscureText: true,
+              validValue: 'Please input valid password',
+              inputType: TextInputType.visiblePassword,
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            CustomTextField(
+              hintText: 'Confirm password',
+              controller: _confirmPassController,
+              obscureText: true,
+              validValue: 'Password not match',
+              inputType: TextInputType.visiblePassword,
+            ),
+            const SizedBox(
+              height: 25,
+            ),
+            _buildRegisterBtn(),
+            const SizedBox(
+              height: 25,
+            ),
+            _buildLoginBtn(),
+          ],
+        ),
       ),
     );
   }
@@ -172,6 +175,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             if (result is User) {
               print('Register successful $username email: $email');
               Loading(context: context).dismissLoading();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => LoginScreen(),
+                ),
+              );
             } else if (result is FirebaseAuthException) {
               // Handle registration failure
               if (result.code == 'email-already-in-use') {

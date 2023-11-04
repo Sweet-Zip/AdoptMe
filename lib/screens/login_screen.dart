@@ -84,83 +84,85 @@ class _LoginScreenState extends State<LoginScreen> {
         isLightMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded;
     return Form(
       key: _formKey,
-      child: Stack(
-        children: [
-          Positioned(
-            top: 15,
-            right: 15,
-            child: IconButton(
-              onPressed: () {
-                themeProvider.toggleTheme();
-              },
-              icon: Icon(icon),
+      child: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Positioned(
+              top: 15,
+              right: 15,
+              child: IconButton(
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+                icon: Icon(icon),
+              ),
             ),
-          ),
-          Column(
-            children: [
-              const SizedBox(height: 85),
-              Container(
-                height: 150,
-                width: 150,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                child: ClipOval(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(
-                      'assets/images/app_logo.png',
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.fitHeight,
+            Column(
+              children: [
+                const SizedBox(height: 85),
+                Container(
+                  height: 150,
+                  width: 150,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        'assets/images/app_logo.png',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.fitHeight,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 25),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 25),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Sign in",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-                    ),
-                  ],
+                const SizedBox(height: 25),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Sign in",
+                        style:
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 25),
-              _buildTextField(),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _buildForgotPass(),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 25),
-              if (_errorMessage
-                  .isNotEmpty) // Show error message if it's not empty
+                const SizedBox(height: 25),
+                _buildTextField(),
+                const SizedBox(height: 10),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    _errorMessage,
-                    style: const TextStyle(
-                      color: Colors.red,
-                    ),
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _buildForgotPass(),
+                    ],
                   ),
                 ),
-              _buildLoginBtn(),
-              const SizedBox(height: 50),
-              _buildRegisterBtn(),
-            ],
-          ),
-        ],
+                const SizedBox(height: 25),
+                if (_errorMessage
+                    .isNotEmpty) // Show error message if it's not empty
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      _errorMessage,
+                      style: const TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                _buildLoginBtn(),
+                const SizedBox(height: 50),
+                _buildRegisterBtn(),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -15,7 +15,7 @@ class UserService with ChangeNotifier {
     notifyListeners();
   }
 
-  final String _baseUrl = 'http://192.168.50.115:3000/api';
+  final String _baseUrl = 'http://172.21.3.8:3000/api';
 
   Future<void> loginUser(String email, String password) async {
     final endpoint =

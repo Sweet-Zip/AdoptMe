@@ -75,6 +75,7 @@ flutter:
     - assets/images/about_img_1.png
     - assets/images/about_img_2.png
     - assets/images/about_img_3.png
+    - assets/images/about_img_4.png
     - assets/images/image_not_available.png
     - assets/images/image_not_found.jpg
     - assets/images/app_logo.png

@@ -6,7 +6,7 @@ import 'dart:convert';
 import '../models/post_model.dart';
 
 class PostService with ChangeNotifier {
-  final String _baseUrl = 'http://192.168.50.115:3000/api';
+  final String _baseUrl = 'http://172.21.3.8:3000/api';
 
   /*Future<List<PostModel>> getAllPosts() async {
     try {
@@ -35,7 +35,7 @@ class PostService with ChangeNotifier {
   }) async {
     try {
       http.Response res = await http.get(
-        Uri.parse('http://192.168.50.115:3000/api/posts/'),
+        Uri.parse('http://172.21.3.8:3000/api/posts/'),
       );
       onResult(await compute(_convertData, res.body));
       onReject(null);
@@ -88,7 +88,7 @@ class PostService with ChangeNotifier {
   }
 
   static Future<List<dynamic>> getPostsByUserId(String userId) async {
-    final url = 'http://192.168.50.115:3000/api/posts/user/$userId';
+    final url = 'http://172.21.3.8:3000/api/posts/user/$userId';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {

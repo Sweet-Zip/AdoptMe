@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import '../models/animal_type_model.dart';
 
 class CategoryService with ChangeNotifier {
-  final String _baseUrl = 'http://192.168.50.115:3000/api';
+  final String _baseUrl = 'http://172.21.3.8:3000/api';
 
 
   Future<List<AnimalModel>> fetchAnimalTypes() async {
@@ -26,7 +26,7 @@ class CategoryService with ChangeNotifier {
   }) async {
     try {
       http.Response res = await http.get(
-        Uri.parse('http://192.168.50.115:3000/api/animal_types/'),
+        Uri.parse('http://172.21.3.8:3000/api/animal_types/'),
       );
       onResult(await compute(_convertData, res.body));
       onReject(null);

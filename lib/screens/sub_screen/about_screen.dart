@@ -103,27 +103,20 @@ class _AboutScreenState extends State<AboutScreen> {
                     myDataList.length, // Adjust the number of items as needed
               ),
             ),
-            Stack(
-              children: [
-                Image.asset('assets/images/about_img_2.png'),
-                const Positioned(
-                  top: 25, // Align to the top
-                  left: 0, // Align to the left
-                  right: 0, // Align to the right
-                  child: Center(
-                    child: Text(
-                      'Why Shop?\nWhen You Can Adopt!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.black, // Set the text color
-                        fontSize: 32, // Set the font size
-                        fontWeight: FontWeight.bold, // Set the font weight
-                      ),
-                    ),
-                  ),
+            const Center(
+              child: Text(
+                'Why Shop?\nWhen You Can Adopt!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black, // Set the text color
+                  fontSize: 32, // Set the font size
+                  fontWeight: FontWeight.bold, // Set the font weight
                 ),
-              ],
-            )
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Image.asset('assets/images/about_img_4.png'),
+
           ],
         ),
       ),
